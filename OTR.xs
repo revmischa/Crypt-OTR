@@ -107,7 +107,7 @@ void
 crypt_otr_set_inject_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_system_message_cb( IN SV* perl_set )
+crypt_otr_set_system_message_cb( IN CV* perl_set )
 
 void 
 crypt_otr_set_connected_cb( IN SV* perl_set )
