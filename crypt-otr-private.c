@@ -7,7 +7,7 @@
 
 
 static void
-crypt_otr_inject_message( CryptOtrUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
+crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
 {
 	dSP;
 	
@@ -29,7 +29,7 @@ crypt_otr_inject_message( CryptOtrUserState crypt_state, const char* account, co
 }
 
 static int 
-crypt_otr_display_otr_message( CryptOtrUserState crypt_state, const char* accountname, 
+crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accountname, 
 						 const char* protocol, const char* username, 
 						 const char* message )
 {
@@ -60,7 +60,7 @@ crypt_otr_display_otr_message( CryptOtrUserState crypt_state, const char* accoun
 }
 
 
-void crypt_otr_notify( CryptOtrUserState crypt_state, OtrlNotifyLevel level, 
+void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level, 
 				   const char* accountname, const char* protocol, const char* username, 
 				   const char* title, const char* primary, const char* secondary )
 {
@@ -209,7 +209,7 @@ int crypt_otr_context_to_trust(ConnContext *context)
 }
 
 /* Generate a private key for the given accountname/protocol */
-void crypt_otr_create_privkey( CryptOtrUserState crypt_state, const char* accountname, const char* protocol  )						
+void crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char* accountname, const char* protocol  )						
 {
     	int key_error;
 			
@@ -235,7 +235,7 @@ void crypt_otr_create_privkey( CryptOtrUserState crypt_state, const char* accoun
 
 
  
-void crypt_otr_startstop( CryptOtrUserState crypt_state, char* accountname, char* protocol, char* username, int start )
+void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username, int start )
 {	
 	char* msg = NULL;
 	ConnContext* ctx = crypt_otr_get_context( crypt_state, accountname, protocol, username );
@@ -266,7 +266,7 @@ void crypt_otr_startstop( CryptOtrUserState crypt_state, char* accountname, char
 		crypt_otr_message_disconnect( crypt_state, ctx );
 }
 
-static void crypt_otr_message_disconnect( CryptOtrUserState crypt_state,  ConnContext* ctx )
+static void crypt_otr_message_disconnect( CryptOTRUserState crypt_state,  ConnContext* ctx )
 {	
 	OtrlUserState userstate = crypt_state->otrl_state;
 	
@@ -278,7 +278,7 @@ static void crypt_otr_message_disconnect( CryptOtrUserState crypt_state,  ConnCo
 
 
 /* Looks up the context for the target in a global hash (stored on the Perl side */
-ConnContext* crypt_otr_get_context( CryptOtrUserState crypt_state, char* accountname, char* protocol, char* username )
+ConnContext* crypt_otr_get_context( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username )
 {
 	int null = 0;
 	ConnContext* ctx;
@@ -292,7 +292,7 @@ ConnContext* crypt_otr_get_context( CryptOtrUserState crypt_state, char* account
 	return ctx;
 }
 
-void crypt_otr_new_fingerprint( CryptOtrUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
+void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
 {
 	printf( "New fingerprint: %s", fingerprint );
 	//otrl_privkey_write_fingerprints( crypt_state->otrl_state, crypt_state->frpfile );
@@ -300,8 +300,8 @@ void crypt_otr_new_fingerprint( CryptOtrUserState crypt_state, const char* accou
 
 
 
-CryptOtrUserState crypt_otr_create_new_userstate(){
-	CryptOtrUserState crypt_state  = malloc( sizeof( struct crypt_otr_user_state ) );
+CryptOTRUserState crypt_otr_create_new_userstate(){
+	CryptOTRUserState crypt_state  = malloc( sizeof( struct crypt_otr_user_state ) );
 
 	crypt_state->otrl_state = NULL;
 	crypt_state->root = NULL;

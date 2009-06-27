@@ -151,9 +151,17 @@ sub new {
 
     my $account_name = delete $opts{account_name} || 'crypt_otr_user';
     my $protocol      = delete $opts{protocol} || 'crypt_otr';
-    my $max_message_size = delete $opts{max_message_size};
+    my $max_message_size = delete $opts{max_message_size} || 2343;  # OSCAR max
+    my $config_dir = delete $opts{config_dir} || "$ENV{HOME}/.otr/";
 
-    my $state = crypt_otr_create_userstate();
+    croak "$config_dir is not writable"
+        unless -w $config_dir;
+
+    mkdir $config_dir unless -e $config_dir;
+    croak "unable to create $config_dir"
+        unless -e $config_dir;
+
+    my $state = crypt_otr_create_userstate($config_dir);
 
     crypt_otr_set_accountname($state, $account_name)
         if defined $account_name;
@@ -167,6 +175,7 @@ sub new {
     my $self = {
         account_name => $account_name,
         protocol_name => $protocol,
+        max_message_size => $max_message_size,
 
         state => $state,        
     };
@@ -221,7 +230,7 @@ sub establish {
     my ($self, $user_name) = @_;
 
     croak "No user_name specified to establish()" unless $user_name;
-    return crypt_otr_establish($self->_us, $self->{account_name}, $self->{protocol}, $user_name);
+    return crypt_otr_establish($self->_args, $user_name);
 }
 
 
@@ -234,7 +243,7 @@ Encrypts $plaintext for $user_name. Returns undef unless an encrypted message ha
 sub encrypt {
     my ($self, $user_name, $plaintext) = @_;
 
-    return crypt_otr_process_sending($self->_us, $user_name, $plaintext);
+    return crypt_otr_process_sending($self->_args, $user_name, $plaintext);
 }
 
 
@@ -247,7 +256,7 @@ Decrypt a message from $user_name, returns plaintext if successful, otherwise un
 sub decrypt {
     my ($self, $user_name, $ciphertext) = @_;
 
-    return crypt_otr_process_receiving($self->_us, $user_name, $ciphertext);
+    return crypt_otr_process_receiving($self->_args, $user_name, $ciphertext);
 }
 
 
@@ -261,12 +270,24 @@ be able to be decrypted
 sub finish {
     my ($self, $user_name) = @_;
 
-    return crypt_otr_disconnect($self->_us, $user_name);
+    return crypt_otr_disconnect($self->_args, $user_name);
 }
 
+sub DESTROY {
+    my $self = shift;
+
+    crypt_otr_cleanup($self->_us);
+}
 
 # get userstate
-sub _us { $_->{state} }
+sub _us { $_[0]->{state} }
+sub account_name { $_[0]->{account_name} }
+sub protocol { $_-[0]>{protocol} }
+sub protocol { $_-[0]>{max_message_size} }
+sub args {
+    my $self = shift;
+    ($self->_us, $self->account_name, $self->protocol, $self->max_message_size);
+}
 
 
 =back
@@ -276,8 +297,6 @@ sub _us { $_->{state} }
 http://www.cypherpunks.ca/otr
 
 =head1 TODO
-
-- Data directory configuration
 
 - More informational callbacks
 

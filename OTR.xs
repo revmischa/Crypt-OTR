@@ -49,7 +49,7 @@ BOOT:
 	MY_CXT.fprfile = NULL;
 	MY_CXT.accountname = NULL;
 	MY_CXT.protocol = NULL;
-	MY_CXT.max_message_size = 32000; /* This is arbitrary. */
+	MY_CXT.max_message_size = 2343; /* AIM. */
 	
 	MY_CXT.inject_cb = NULL;
 	MY_CXT.display_cb = NULL;
@@ -61,7 +61,7 @@ BOOT:
 	MY_CXT.new_fpr_cb = NULL;
 	
 	crypt_otr_root = "~/.otr/";
-	crypt_otr_max_size = 32767;
+	crypt_otr_max_size = 2343;
 }
 
 
@@ -69,18 +69,18 @@ void
 crypt_otr_init( )
 
 void 
-crypt_otr_establish( IN struct crypt_otr_user_state* perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
+crypt_otr_establish( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
 
 void
-crypt_otr_disconnect( IN struct crypt_otr_user_state* perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
+crypt_otr_disconnect( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
 
 SV*
-crypt_otr_process_sending( IN crypt_otr_user_state* perl_state, IN char* perl_username, IN char* perl_message )	
+crypt_otr_process_sending( IN CryptOTRUserState perl_state, IN char* perl_username, IN char* perl_message )	
 	OUTPUT:
 		RETVAL
 
 SV* 
-crypt_otr_process_receiving( IN crypt_otr_user_state* perl_state, IN char* perl_who, IN char* perl_message )
+crypt_otr_process_receiving( IN CryptOTRUserState perl_state, IN char* perl_who, IN char* perl_message )
 	OUTPUT:
 		RETVAL
 

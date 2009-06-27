@@ -42,7 +42,6 @@ Crypt::OTR::crypt_otr_set_info_cb( \&perl_notify_info );
 Crypt::OTR::crypt_otr_set_connected_cb( \&perl_connected );
 Crypt::OTR::crypt_otr_set_unverified_cb( \&perl_unverified );
 
-
 sub perl_inject_message {
 	my( $actname, $proto, $them, $msg ) = @_;
 	
