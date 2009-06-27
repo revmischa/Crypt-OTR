@@ -139,6 +139,8 @@ Options:
 =cut
 
 sub init {
+    my ($class, %opts) = @_;
+
     crypt_otr_init();
 
     my $account_name = delete $opts{account_name} || 'crypt_otr_user';
