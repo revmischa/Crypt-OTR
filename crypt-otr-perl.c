@@ -17,7 +17,7 @@ int crypt_otr_init(  )
 	OTRL_INIT;
 }
 
-CryptOtrUserState crypt_otr_create_user( char* in_root )
+CryptOTRUserState crypt_otr_create_user( char* in_root )
 {
 	char* root = in_root;
 	char* temp_keyfile;
@@ -26,7 +26,7 @@ CryptOtrUserState crypt_otr_create_user( char* in_root )
 	char* temp_key_name = PRIVKEY_FILE_NAME;
 	char* temp_fpr_name = STORE_FILE_NAME;
 	
-	CryptOtrUserState crypt_state = crypt_otr_create_new_userstate();
+	CryptOTRUserState crypt_state = crypt_otr_create_new_userstate();
 
 	crypt_state->root = in_root;
 	
@@ -51,7 +51,7 @@ CryptOtrUserState crypt_otr_create_user( char* in_root )
 	return crypt_state;}
 
 
-void crypt_otr_establish( CryptOtrUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
+void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
 {	
 	
 	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
@@ -67,13 +67,13 @@ void crypt_otr_establish( CryptOtrUserState in_state, char* in_account, char* in
 }
 
 
-void crypt_otr_disconnect( CryptOtrUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
+void crypt_otr_disconnect( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
 {
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 0 );
 }
 
 
-SV* crypt_otr_process_sending( CryptOtrUserState crypt_state, char* in_account, char* in_proto, int in_max, char* who, char* sv_message )
+SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, char* in_proto, int in_max, char* who, char* sv_message )
 {
 	char* newmessage = NULL;
 	char* message = strdup( sv_message );
@@ -126,7 +126,7 @@ SV* crypt_otr_process_sending( CryptOtrUserState crypt_state, char* in_account, 
  * returns whether a otr_message was received
  * sets *message to NULL, when it was an internal otr message
  */
-SV*  crypt_otr_process_receiving( CryptOtrUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, char* who, char* sv_message )
+SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, char* who, char* sv_message )
 {
 	char* message = strdup( sv_message  );
 	//char* message = message_ptr;
@@ -254,6 +254,6 @@ SV*  crypt_otr_process_receiving( CryptOtrUserState crypt_state, char* in_accoun
 
 
 
-void crypt_otr_cleanup( CryptOtrUserState crypt_state ){
+void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
 	free( crypt_state );
 }

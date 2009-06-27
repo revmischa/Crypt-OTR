@@ -17,7 +17,7 @@
 
 
 
-typedef struct crypt_otr_user_state* CryptOtrUserState;
+typedef struct crypt_otr_user_state* CryptOTRUserState;
 
 struct crypt_otr_user_state {
 	OtrlUserState otrl_state;
@@ -46,14 +46,14 @@ void 		crypt_otr_handle_unverified_connection( char* username );
 void 		crypt_otr_handle_disconnection( char* username );
 void 		crypt_otr_handle_stillconnected( char* username );
 
-static int 	crypt_otr_display_otr_message( CryptOtrUserState crypt_state, const char* accountname, const char* protocol, const char* username, const char* message );
-static void 	crypt_otr_inject_message( CryptOtrUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message );
+static int 	crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, const char* message );
+static void 	crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message );
 
-void crypt_otr_notify( CryptOtrUserState crypt_state, OtrlNotifyLevel level, const char* accountname, const char* protocol, const char* username, const char* title, const char* primary, const char* secondary );
+void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level, const char* accountname, const char* protocol, const char* username, const char* title, const char* primary, const char* secondary );
 
-static void 	crypt_otr_message_disconnect( CryptOtrUserState crypt_state, ConnContext* ctx );
-ConnContext* 	crypt_otr_get_context( CryptOtrUserState crypt_state, char* accountname, char* protocol, char* username );
-void 		crypt_otr_create_privkey( CryptOtrUserState crypt_state, const char *accountname, const char *protocol);
+static void 	crypt_otr_message_disconnect( CryptOTRUserState crypt_state, ConnContext* ctx );
+ConnContext* 	crypt_otr_get_context( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username );
+void 		crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char *accountname, const char *protocol);
 
 void process_sending_im( char* who, char* message );
 
@@ -61,26 +61,26 @@ void process_sending_im( char* who, char* message );
 static OtrlPolicy 	policy_cb(void *opdata, ConnContext *context);
 static const char *	protocol_name_cb(void *opdata, const char *protocol);
 static void 		protocol_name_free_cb(void *opdata, const char *protocol_name);
-static void 		create_privkey_cb(CryptOtrUserState opdata, const char *accountname,
+static void 		create_privkey_cb(CryptOTRUserState opdata, const char *accountname,
 							   const char *protocol);
 static int 		is_logged_in_cb(void *opdata, const char *accountname,
 							 const char *protocol, const char *recipient);
-static void 		inject_message_cb(CryptOtrUserState opdata, const char *accountname,
+static void 		inject_message_cb(CryptOTRUserState opdata, const char *accountname,
 							   const char *protocol, const char *recipient, const char *message);
-static void 		notify_cb(CryptOtrUserState opdata, OtrlNotifyLevel level,
+static void 		notify_cb(CryptOTRUserState opdata, OtrlNotifyLevel level,
 						const char *accountname, const char *protocol, const char *username,
 						const char *title, const char *primary, const char *secondary);
-static int 		display_otr_message_cb(CryptOtrUserState opdata, const char *accountname, const char *protocol, const char *username, const char *msg);
+static int 		display_otr_message_cb(CryptOTRUserState opdata, const char *accountname, const char *protocol, const char *username, const char *msg);
 static void 		update_context_list_cb(void *opdata);
-static void 		confirm_fingerprint_cb(CryptOtrUserState opdata, OtrlUserState us, const char *accountname, const char *protocol, const char *username, unsigned char fingerprint[20]);
-static void 		write_fingerprints_cb(CryptOtrUserState opdata);
+static void 		confirm_fingerprint_cb(CryptOTRUserState opdata, OtrlUserState us, const char *accountname, const char *protocol, const char *username, unsigned char fingerprint[20]);
+static void 		write_fingerprints_cb(CryptOTRUserState opdata);
 static void 		gone_secure_cb(void *opdata, ConnContext *context);
 static void 		gone_insecure_cb(void *opdata, ConnContext *context);
 static void 		still_secure_cb(void *opdata, ConnContext *context, int is_reply);
 static void 		log_message_cb(void *opdata, const char *message);
-static int 		max_message_size_cb(CryptOtrUserState opdata, ConnContext *context);
-static const char* 	account_name_cb( CryptOtrUserState opdata, const char *account, const char *protocol );
-static void 		account_name_free_cb(CryptOtrUserState opdata, const char *account_name);
+static int 		max_message_size_cb(CryptOTRUserState opdata, ConnContext *context);
+static const char* 	account_name_cb( CryptOTRUserState opdata, const char *account, const char *protocol );
+static void 		account_name_free_cb(CryptOTRUserState opdata, const char *account_name);
 
 
 typedef enum {
@@ -92,7 +92,7 @@ typedef enum {
 
 int crypt_otr_context_to_trust(ConnContext *context);
 
-CryptOtrUserState get_state( SV* sv_state );
+CryptOTRUserState get_state( SV* sv_state );
 
 
 

@@ -29,7 +29,7 @@ static void protocol_name_free_cb(void *opdata, const char *protocol_name)
 	free( protocol_name );
 }
 
-static void create_privkey_cb(CryptOtrUserState opdata, const char *accountname,
+static void create_privkey_cb(CryptOTRUserState opdata, const char *accountname,
 	const char *protocol)
 {
 	/*if( strcmp( opdata->accountname, accountname) || strcmp( opdata->protocol, protocol ) )
@@ -52,7 +52,7 @@ static int is_logged_in_cb(void *opdata, const char *accountname,
 
 /* Send the given IM to the given recipient from the given
  * accountname/protocol. */
-static void inject_message_cb( CryptOtrUserState opdata, const char *accountname,
+static void inject_message_cb( CryptOTRUserState opdata, const char *accountname,
 	const char *protocol, const char *recipient, const char *message)
 {    
 	puts( "Injecting message" );
@@ -62,7 +62,7 @@ static void inject_message_cb( CryptOtrUserState opdata, const char *accountname
 
 /* Display a notification message for a particular accountname /
  * protocol / username conversation. */
-static void notify_cb(CryptOtrUserState opdata, OtrlNotifyLevel level,
+static void notify_cb(CryptOTRUserState opdata, OtrlNotifyLevel level,
 				  const char *accountname, const char *protocol, const char *username,
 				  const char *title, const char *primary, const char *secondary)
 {
@@ -77,7 +77,7 @@ static void notify_cb(CryptOtrUserState opdata, OtrlNotifyLevel level,
  * function is NULL), the control message will be displayed inline,
  * as a received message, or else by using the above notify()
  * callback. */
-static int display_otr_message_cb(CryptOtrUserState opdata, const char *accountname,
+static int display_otr_message_cb(CryptOTRUserState opdata, const char *accountname,
 						    const char *protocol, const char *username, const char *msg)
 {
 	return crypt_otr_display_otr_message(opdata, accountname, protocol, username, msg);
@@ -90,7 +90,7 @@ static void update_context_list_cb(void *opdata)
 	// There is no UI so there is nothing to do here
 }
 
-static void confirm_fingerprint_cb(CryptOtrUserState opdata, OtrlUserState us,
+static void confirm_fingerprint_cb(CryptOTRUserState opdata, OtrlUserState us,
 	const char *accountname, const char *protocol, const char *username,
 	unsigned char fingerprint[20])
 {
@@ -101,7 +101,7 @@ static void confirm_fingerprint_cb(CryptOtrUserState opdata, OtrlUserState us,
 	crypt_otr_new_fingerprint( opdata, accountname, protocol, username, readable );
 }
 
-static void write_fingerprints_cb( CryptOtrUserState opdata)
+static void write_fingerprints_cb( CryptOTRUserState opdata)
 {
 	otrl_privkey_write_fingerprints( opdata->otrl_state, opdata->fprfile );
 }
@@ -128,20 +128,20 @@ static void log_message_cb(void *opdata, const char *message)
     printf("otr: %s", message);
 }
 
-static int max_message_size_cb(CryptOtrUserState opdata, ConnContext *context)
+static int max_message_size_cb(CryptOTRUserState opdata, ConnContext *context)
 {
 	return opdata->max_size;
 }
 
 /* Return a newly allocated string containing a human-friendly
  * representation for the given account */
-static const char* account_name_cb( CryptOtrUserState opdata, const char *account, const char *protocol )
+static const char* account_name_cb( CryptOTRUserState opdata, const char *account, const char *protocol )
 {
 	
 }
 
 /* Deallocate a string returned by account_name */
-static void account_name_free_cb( CryptOtrUserState opdata, const char *account_name)
+static void account_name_free_cb( CryptOTRUserState opdata, const char *account_name)
 {
 	
 }
