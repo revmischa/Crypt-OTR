@@ -109,7 +109,7 @@ static void gone_secure_cb(void *opdata, ConnContext *context)
 
 static void gone_insecure_cb(void *opdata, ConnContext *context)
 {
-    crypt_otr_handle_disconnected(context->username);
+    crypt_otr_handle_disconnection(context->username);
 }
 
 static void still_secure_cb(void *opdata, ConnContext *context, int is_reply)

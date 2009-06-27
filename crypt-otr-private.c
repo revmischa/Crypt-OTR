@@ -114,6 +114,7 @@ void crypt_otr_handle_connected(ConnContext* context)
 	}
 }
 
+
 void crypt_otr_callback_one_string( SV* callback_sub, char* username )
 {
 	dSP;
