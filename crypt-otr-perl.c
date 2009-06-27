@@ -45,18 +45,25 @@ CryptOTRUserState crypt_otr_create_user( char* in_root )
 	crypt_state->keyfile = temp_keyfile;
 	crypt_state->fprfile = temp_fingerprintfile;
 
-	free( temp_keyfile );
-	free( temp_fingerprintfile );
+	printf( "Saved keyfile %s\n", crypt_state->keyfile );
+
+	//free( temp_keyfile );
+	//free( temp_fingerprintfile );
 	
-	return crypt_state;}
+	printf( "Made State = %i\n", crypt_state );
+
+	
+	return crypt_state;
+}
 
 
 void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
-{	
-	
+{		
+	printf( "Got State = %i\n", in_state );
+		
 	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
 		printf( "Could not read OTR key from %s\n", in_state->keyfile);
-		crypt_otr_create_privkey( in_state->otrl_state, in_account, in_proto );
+		crypt_otr_create_privkey( in_state, in_account, in_proto );
 	}
 	else {
 		printf( "Loaded private key file from %s\n", in_state->keyfile );
@@ -255,5 +262,9 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
+
+	free( crypt_state->keyfile );
+	free( crypt_state->fprfile );
 	free( crypt_state );
+
 }
