@@ -21,7 +21,7 @@ crypt_otr_inject_message( const char* account, const char* protocol, const char*
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
 	PUTBACK;
 
-	call_pv( crypt_otr_get_inject_cb(), G_DISCARD );
+	call_sv( crypt_otr_get_inject_cb(), G_DISCARD );
 	//call_pv( "main::perl_inject_message", G_DISCARD );
 	
 	FREETMPS;
@@ -44,7 +44,7 @@ crypt_otr_display_otr_message( const char* accountname, const char* protocol, co
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
 	PUTBACK;
 
-	num_items_on_stack = call_pv( crypt_otr_get_display_cb(), G_DISCARD );
+	num_items_on_stack = call_sv( crypt_otr_get_display_cb(), G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -71,13 +71,13 @@ void crypt_otr_notify( OtrlNotifyLevel level, const char* accountname, const cha
 
 	switch (level) {
 	case OTRL_NOTIFY_ERROR:
-		call_pv( crypt_otr_get_error_cb(), G_DISCARD );
+		call_sv( crypt_otr_get_error_cb(), G_DISCARD );
 		break;
 	case OTRL_NOTIFY_WARNING:
-		call_pv( crypt_otr_get_warning_cb(), G_DISCARD );
+		call_sv( crypt_otr_get_warning_cb(), G_DISCARD );
 		break;
 	case OTRL_NOTIFY_INFO:
-		call_pv( crypt_otr_get_notify_cb(), G_DISCARD );
+		call_sv( crypt_otr_get_notify_cb(), G_DISCARD );
 		break;
 	}
 	
@@ -114,7 +114,7 @@ void crypt_otr_handle_connected(ConnContext* context)
 	}
 }
 
-void crypt_otr_callback_one_string( char* callback_sub, char* username )
+void crypt_otr_callback_one_string( SV* callback_sub, char* username )
 {
 	dSP;
 	
@@ -125,7 +125,7 @@ void crypt_otr_callback_one_string( char* callback_sub, char* username )
 	XPUSHs( sv_2mortal( newSVpv( username, 0 ))); 
 	PUTBACK;
 
-	call_pv( callback_sub, G_DISCARD );
+	call_sv( callback_sub, G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;

@@ -61,7 +61,7 @@ BOOT:
 	MY_CXT.new_fpr_cb = NULL;
 	
 	crypt_otr_root = "~/.otr/";
-	crypt_otr_max_size = 32000;
+	crypt_otr_max_size = 32767;
 }
 
 
@@ -104,34 +104,34 @@ void
 crypt_otr_set_max_message_size ( IN int perl_set )
 
 void 
-crypt_otr_set_inject_cb( IN char* perl_set )
+crypt_otr_set_inject_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_display_cb( IN char* perl_set )
+crypt_otr_set_system_message_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_connected_cb( IN char* perl_set )
+crypt_otr_set_connected_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_unverified_cb( IN char* perl_set )
+crypt_otr_set_unverified_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_stillconnected_cb( IN char* perl_set )
+crypt_otr_set_stillconnected_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_disconnected_cb( IN char* perl_set )
+crypt_otr_set_disconnected_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_error_cb( IN char* perl_set ) 
+crypt_otr_set_error_cb( IN SV* perl_set ) 
 
 void 
-crypt_otr_set_warning_cb( IN char* perl_set )
+crypt_otr_set_warning_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_info_cb( IN char* perl_set )
+crypt_otr_set_info_cb( IN SV* perl_set )
 
 void 
-crypt_otr_set_new_fpr_cb( IN char* perl_set ) 
+crypt_otr_set_new_fpr_cb( IN SV* perl_set ) 
 
 
 
