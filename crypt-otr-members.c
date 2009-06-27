@@ -37,7 +37,7 @@ char* crypt_otr_protocol;
 unsigned int crypt_otr_max_size;
 
 SV* crypt_otr_inject_cb;
-SV* crypt_otr_display_cb;
+SV* crypt_otr_system_message_cb;
 SV* crypt_otr_connected_cb;
 SV* crypt_otr_unverified_cb;
 SV* crypt_otr_disconnected_cb;
@@ -56,7 +56,7 @@ char* crypt_otr_get_protocol() { return crypt_otr_protocol; }
 unsigned int crypt_otr_get_max_message_size() { return crypt_otr_max_size; }
 
 SV* crypt_otr_get_inject_cb() { return  crypt_otr_inject_cb; }
-SV* crypt_otr_get_display_cb() { return crypt_otr_display_cb; }
+SV* crypt_otr_get_system_message_cb() { return crypt_otr_system_message_cb; }
 SV* crypt_otr_get_connected_cb() { return crypt_otr_connected_cb; }
 SV* crypt_otr_get_unverified_cb() { return crypt_otr_unverified_cb; }
 SV* crypt_otr_get_disconnected_cb() { return crypt_otr_disconnected_cb; }
@@ -75,8 +75,11 @@ void crypt_otr_set_accountname( char* in_accountname ) { crypt_otr_accountname =
 void crypt_otr_set_protocol( char* in_protocol ) { crypt_otr_protocol = in_protocol; }
 void crypt_otr_set_max_message_size ( int in_max_size ) { crypt_otr_max_size = in_max_size; }
 
-void crypt_otr_set_inject_cb( SV* in_inject_cb ){ crypt_otr_inject_cb = in_inject_cb; }
-void crypt_otr_set_display_cb( SV* in_display_cb ){ crypt_otr_display_cb = in_display_cb; }
+void crypt_otr_set_inject_cb( SV* in_inject_cb ){ crypt_otr_inject_cb = in_inject_cb;
+	printf( "Inject set to: %i\n", SvUV( crypt_otr_inject_cb ) );
+
+ }
+void crypt_otr_set_system_message_cb( SV* in_sys_mes_cb ){ crypt_otr_system_message_cb = in_sys_mes_cb; }
 void crypt_otr_set_connected_cb( SV* in_connected_cb ){ crypt_otr_connected_cb = in_connected_cb; }
 void crypt_otr_set_unverified_cb( SV* in_unver_cb ) { crypt_otr_unverified_cb = in_unver_cb; }
 void crypt_otr_set_disconnected_cb( SV* in_disconnected_cb ){ crypt_otr_disconnected_cb = in_disconnected_cb; }

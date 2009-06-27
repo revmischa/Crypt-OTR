@@ -3,7 +3,7 @@
 
 
 use warnings;
-use lib "$ENV{HOME}/perllib";
+use lib "$ENV{HOME}/perllib/lib/perl/5.10.0";
 
 use Crypt::OTR;
 
@@ -33,16 +33,14 @@ Crypt::OTR::crypt_otr_set_max_message_size( 10000 );
 Crypt::OTR::crypt_otr_set_root( "~/.grids/otr/" ); # default is ~/.otr
 
 #These two functions are the most important.  
-Crypt::OTR::crypt_otr_set_inject_cb( "main::perl_inject_message" );
-Crypt::OTR::crypt_otr_set_display_cb( "main::perl_display_message" );
+Crypt::OTR::crypt_otr_set_inject_cb( \&perl_inject_message );
+Crypt::OTR::crypt_otr_set_system_message_cb( \&perl_display_message );
+Crypt::OTR::crypt_otr_set_error_cb( \&perl_notify_error );
+Crypt::OTR::crypt_otr_set_warning_cb( \&perl_notify_warning );
+Crypt::OTR::crypt_otr_set_info_cb( \&perl_notify_info );
 
-Crypt::OTR::crypt_otr_set_display_cb( "main::perl_notify_error" );
-Crypt::OTR::crypt_otr_set_display_cb( "main::perl_notify_warning" );
-Crypt::OTR::crypt_otr_set_display_cb( "main::perl_notify_info" );
-
-Crypt::OTR::crypt_otr_set_connected_cb( "main::perl_connected" );
-Crypt::OTR::crypt_otr_set_unverified_cb( "main::perl_unverified" );
-
+Crypt::OTR::crypt_otr_set_connected_cb( \&perl_connected );
+Crypt::OTR::crypt_otr_set_unverified_cb( \&perl_unverified );
 
 
 sub perl_inject_message {
@@ -143,7 +141,7 @@ Crypt::OTR::crypt_otr_init( );
 
 #Crypt::OTR::crypt_otr_establish( $username );
 
-perl_inject_message( "one", "two", "three", "lol hi" );
+#perl_inject_message( "one", "two", "three", "lol hi" );
 
 
 while( 1 ) {
@@ -153,7 +151,7 @@ while( 1 ) {
 	
 	print "Read...\n";
 	
-	print $sock_out $std_read;
+	print $sock_out $std_read . "\n";
 }
 
 

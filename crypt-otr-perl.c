@@ -54,7 +54,7 @@ int crypt_otr_init(  )
 
 	free( temp_keyfile );
 	free( temp_fingerprintfile );
-	
+			
 	return 0;
 }
 

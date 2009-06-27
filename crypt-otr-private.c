@@ -44,7 +44,7 @@ crypt_otr_display_otr_message( const char* accountname, const char* protocol, co
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
 	PUTBACK;
 
-	num_items_on_stack = call_sv( crypt_otr_get_display_cb(), G_DISCARD );
+	num_items_on_stack = call_sv( crypt_otr_get_system_message_cb(), G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -77,7 +77,7 @@ void crypt_otr_notify( OtrlNotifyLevel level, const char* accountname, const cha
 		call_sv( crypt_otr_get_warning_cb(), G_DISCARD );
 		break;
 	case OTRL_NOTIFY_INFO:
-		call_sv( crypt_otr_get_notify_cb(), G_DISCARD );
+		call_sv( crypt_otr_get_info_cb(), G_DISCARD );
 		break;
 	}
 	
