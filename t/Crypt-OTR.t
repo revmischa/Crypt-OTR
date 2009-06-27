@@ -33,7 +33,7 @@ sub test_multithreading {
         });
 
         sleep 1;
-        print @$alice_buf;
+        warn "\nalice buf: @$alice_buf\n";
     };
 
     my $bob_thread = async {
@@ -42,10 +42,10 @@ sub test_multithreading {
         });
 
         sleep 2;
-        print @$bob_buf;
+        warn "\nbob buf: @$bob_buf\n";
     };
 
-    $_->join foreach threads->list;
+    $_->join foreach ($alice_thread, $bob_thread);
 
     return 1;
 }
@@ -61,11 +61,13 @@ sub init {
                              );
 
     my $inject = sub {
+        warn "\ninject\n";
         my ($self, $account_name, $protocol, $dest_account, $message) = @_;
         push @$dest, $message;
     };
 
     my $unverified = sub {
+        warn "\n\nunverified\n\n";
         my ($otr, $other_user) = @_;
         print "Unverified conversation started with $other_user\n";
     };
