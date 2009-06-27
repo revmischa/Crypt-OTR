@@ -1,0 +1,3 @@
+TYPEMAP
+
+crypt_otr_userstate *   T_UV

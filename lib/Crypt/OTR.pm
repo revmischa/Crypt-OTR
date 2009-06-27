@@ -45,15 +45,15 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
 
     use Crypt::OTR;
     
-    # call near the beginning of your program, should only be one per process
-    Crypt::OTR->init(
+    # call near the beginning of your program
+    Crypt::OTR->init;
+
+    # create OTR object, set up callbacks
+    my $otr = new Crypt::OTR(
         account_name     => "alice",            # name of account associated with this keypair
         protocol_name    => "my_protocol_name", # e.g. 'AIM'
         max_message_size => 1024,               # how much to fragment
     );
-
-    # create OTR object, set up callbacks
-    my $otr = new Crypt::OTR();
     $otr->set_callback('inject' => \&otr_inject);
     $otr->set_callback('otr_message' => \&otr_system_message);
     $otr->set_callback('connect' => \&otr_connect);
@@ -128,43 +128,47 @@ None by default.
 
 This method sets up OTR and initializes the global OTR context. It is probably unsafe to call this more than once
 
-Options:
- 'account_name'     => name of the account in your application
- 'protocol_name'    => string identifying your application
- 'max_message_size' => how many bytes messages should be fragmented into
-
 =cut
 
 sub init {
-    my ($class, %opts) = @_;
-
     crypt_otr_init();
-
-    my $account_name = delete $opts{account_name} || 'crypt_otr_user';
-    my $protocol_name = delete $opts{protocol_name} || 'crypt_otr';
-    my $max_message_size = delete $opts{max_message_size};
-
-    crypt_otr_set_accountname($account_name)
-        if defined $account_name;
-
-    crypt_otr_set_protocol($protocol_name)
-        if defined $protocol_name;
-
-    crypt_otr_set_max_message_size($max_message_size)
-        if defined $max_message_size;
 }
 
 
-=item new()
+=item new(%opts)
 
-Simple constructor.
+This method sets up an OTR context for an account on a protocol (e.g. sk8rD00d510 on OSCAR)                                                                                                            
+
+Options:
+ 'account_name'     => name of the account in your application
+ 'protocol'         => string identifying your application
+ 'max_message_size' => how many bytes messages should be fragmented into
 
 =cut
 
 sub new {
     my ($class, %opts) = @_;
 
+    my $account_name = delete $opts{account_name} || 'crypt_otr_user';
+    my $protocol      = delete $opts{protocol} || 'crypt_otr';
+    my $max_message_size = delete $opts{max_message_size};
+
+    my $state = crypt_otr_create_userstate();
+
+    crypt_otr_set_accountname($state, $account_name)
+        if defined $account_name;
+
+    crypt_otr_set_protocol($state, $protocol)
+        if defined $protocol;
+
+    crypt_otr_set_max_message_size($state, $max_message_size)
+        if defined $max_message_size;
+
     my $self = {
+        account_name => $account_name,
+        protocol_name => $protocol,
+
+        state => $state,        
     };
 
     return bless $self, $class;
@@ -203,7 +207,7 @@ sub set_callback {
     my $cb_method = $callback_map->{$action}
     or croak "unknown callback $action";
 
-    $cb_method->($cb);
+    $cb_method->($self->_us, $cb);
 }
 
 
@@ -217,7 +221,7 @@ sub establish {
     my ($self, $user_name) = @_;
 
     croak "No user_name specified to establish()" unless $user_name;
-    return crypt_otr_establish($user_name);
+    return crypt_otr_establish($self->_us, $self->{account_name}, $self->{protocol}, $user_name);
 }
 
 
@@ -230,7 +234,7 @@ Encrypts $plaintext for $user_name. Returns undef unless an encrypted message ha
 sub encrypt {
     my ($self, $user_name, $plaintext) = @_;
 
-    return crypt_otr_process_sending($user_name, $plaintext);
+    return crypt_otr_process_sending($self->_us, $user_name, $plaintext);
 }
 
 
@@ -243,7 +247,7 @@ Decrypt a message from $user_name, returns plaintext if successful, otherwise un
 sub decrypt {
     my ($self, $user_name, $ciphertext) = @_;
 
-    return crypt_otr_process_receiving($user_name, $ciphertext);
+    return crypt_otr_process_receiving($self->_us, $user_name, $ciphertext);
 }
 
 
@@ -257,8 +261,13 @@ be able to be decrypted
 sub finish {
     my ($self, $user_name) = @_;
 
-    return crypt_otr_disconnect($user_name);
+    return crypt_otr_disconnect($self->_us, $user_name);
 }
+
+
+# get userstate
+sub _us { $_->{state} }
+
 
 =back
 

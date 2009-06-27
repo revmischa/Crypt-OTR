@@ -1,6 +1,3 @@
-
-use lib "$ENV{HOME}/perllib/lib/perl/5.10.0";
-
 use Test::More qw/no_plan/;
 BEGIN { use_ok('Crypt::OTR') };
 
@@ -19,7 +16,10 @@ my $bob_buf = [];
 my $u1 = "alice";
 my $u2 = "bob";
 
+Crypt::OTR->init;
+
 my ($alice, $bob) = (init($u1, $alice_buf), init($u2, $bob_buf));
+
 ok(test_multithreading(), "multithreading");
 
 
