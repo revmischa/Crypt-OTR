@@ -173,9 +173,10 @@ sub new {
 #        if defined $max_message_size;
 
     my $self = {
-        account_name => $account_name,
-        protocol => $protocol,
+        account_name     => $account_name,
+        protocol         => $protocol,
         max_message_size => $max_message_size,
+        config_dir       => $config_dir,
 
         state => $state,        
     };
@@ -230,10 +231,6 @@ sub establish {
     my ($self, $user_name) = @_;
 
     croak "No user_name specified to establish()" unless $user_name;
-
-    use Data::Dumper;
-    warn Dumper($self);
-    warn "name=$user_name";
     return crypt_otr_establish($self->_args, $user_name);
 }
 
@@ -287,6 +284,7 @@ sub DESTROY {
 sub _us { $_[0]->{state} }
 sub account_name { $_[0]->{account_name} }
 sub protocol { $_[0]->{protocol} }
+sub config_dir { $_[0]->{config_dir} }
 sub max_message_size { $_[0]->{max_message_size} }
 sub _args {
     my $self = shift;
