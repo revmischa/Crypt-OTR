@@ -3,7 +3,7 @@ package Crypt::OTR;
 use 5.010000;
 use strict;
 use warnings;
-use Carp;
+use Carp qw/croak/;
 
 use AutoLoader;
 
@@ -45,8 +45,7 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
 
     use Crypt::OTR;
     
-    # call near the beginning of your program, should only be one per
-    # process
+    # call near the beginning of your program, should only be one per process
     Crypt::OTR->init(
         account_name     => "alice",            # name of account associated with this keypair
         protocol_name    => "my_protocol_name", # e.g. 'AIM'
@@ -217,6 +216,7 @@ Attemps to begin an OTR-encrypted conversation with $user_name. This will call t
 sub establish {
     my ($self, $user_name) = @_;
 
+    croak "No user_name specified to establish()" unless $user_name;
     return crypt_otr_establish($user_name);
 }
 
