@@ -161,20 +161,20 @@ sub new {
     croak "unable to create $config_dir"
         unless -e $config_dir;
 
-    my $state = crypt_otr_create_userstate($config_dir);
+    my $state = crypt_otr_create_user($config_dir);
 
-    crypt_otr_set_accountname($state, $account_name)
-        if defined $account_name;
+#    crypt_otr_set_accountname($state, $account_name)
+#        if defined $account_name;
 
-    crypt_otr_set_protocol($state, $protocol)
-        if defined $protocol;
+#    crypt_otr_set_protocol($state, $protocol)
+#        if defined $protocol;
 
-    crypt_otr_set_max_message_size($state, $max_message_size)
-        if defined $max_message_size;
+#    crypt_otr_set_max_message_size($state, $max_message_size)
+#        if defined $max_message_size;
 
     my $self = {
         account_name => $account_name,
-        protocol_name => $protocol,
+        protocol => $protocol,
         max_message_size => $max_message_size,
 
         state => $state,        
@@ -230,6 +230,10 @@ sub establish {
     my ($self, $user_name) = @_;
 
     croak "No user_name specified to establish()" unless $user_name;
+
+    use Data::Dumper;
+    warn Dumper($self);
+    warn "name=$user_name";
     return crypt_otr_establish($self->_args, $user_name);
 }
 
@@ -282,9 +286,9 @@ sub DESTROY {
 # get userstate
 sub _us { $_[0]->{state} }
 sub account_name { $_[0]->{account_name} }
-sub protocol { $_-[0]>{protocol} }
-sub protocol { $_-[0]>{max_message_size} }
-sub args {
+sub protocol { $_[0]->{protocol} }
+sub max_message_size { $_[0]->{max_message_size} }
+sub _args {
     my $self = shift;
     ($self->_us, $self->account_name, $self->protocol, $self->max_message_size);
 }

@@ -1,0 +1,1 @@
+svn up && perl Makefile.PL PREFIX=~/perllib && make install && perl -I/home/mish/perllib/lib/perl/5.10.0 t/Crypt-OTR.t
