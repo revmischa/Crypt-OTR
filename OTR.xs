@@ -104,34 +104,34 @@ void
 crypt_otr_set_max_message_size ( IN int perl_set )
 
 void 
-crypt_otr_set_inject_cb( IN SV* perl_set )
+crypt_otr_set_inject_cb( IN CV* perl_set )
 
 void 
 crypt_otr_set_system_message_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_connected_cb( IN SV* perl_set )
+crypt_otr_set_connected_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_unverified_cb( IN SV* perl_set )
+crypt_otr_set_unverified_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_stillconnected_cb( IN SV* perl_set )
+crypt_otr_set_stillconnected_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_disconnected_cb( IN SV* perl_set )
+crypt_otr_set_disconnected_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_error_cb( IN SV* perl_set ) 
+crypt_otr_set_error_cb( IN CV* perl_set ) 
 
 void 
-crypt_otr_set_warning_cb( IN SV* perl_set )
+crypt_otr_set_warning_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_info_cb( IN SV* perl_set )
+crypt_otr_set_info_cb( IN CV* perl_set )
 
 void 
-crypt_otr_set_new_fpr_cb( IN SV* perl_set ) 
+crypt_otr_set_new_fpr_cb( IN CV* perl_set ) 
 
 
 

@@ -139,7 +139,7 @@ $sock_out or die "no sock_out\n";
 
 Crypt::OTR::crypt_otr_init( );
 
-#Crypt::OTR::crypt_otr_establish( $username );
+Crypt::OTR::crypt_otr_establish( $username );
 
 #perl_inject_message( "one", "two", "three", "lol hi" );
 

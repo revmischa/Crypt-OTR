@@ -38,10 +38,18 @@ crypt_otr_display_otr_message( const char* accountname, const char* protocol, co
 	SAVETMPS;
 
 	PUSHMARK(SP);
-	XPUSHs( sv_2mortal( newSVpv( accountname, 0 ))); // The 0 causes perl to calculate the Strlen ...
-	XPUSHs( sv_2mortal( newSVpv( protocol, 0 )));
-	XPUSHs( sv_2mortal( newSVpv( username, 0 )));
-	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
+	//XPUSHs( sv_2mortal( newSVpv( accountname, 0 ))); // The 0 causes perl to calculate the Strlen ...
+	//XPUSHs( sv_2mortal( newSVpv( protocol, 0 )));
+	//XPUSHs( sv_2mortal( newSVpv( username, 0 )));
+	//XPUSHs( sv_2mortal( newSVpv( message, 0 )));
+	XPUSHs(  newSVpv( accountname, 0 )); // The 0 causes perl to calculate the Strlen ...
+	XPUSHs(  newSVpv( protocol, 0 ));
+	XPUSHs(  newSVpv( username, 0 ));
+	XPUSHs(  newSVpv( message, 0 ));
+
+
+
+
 	PUTBACK;
 
 	num_items_on_stack = call_sv( crypt_otr_get_system_message_cb(), G_DISCARD );

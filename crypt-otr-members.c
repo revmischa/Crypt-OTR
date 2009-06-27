@@ -36,16 +36,16 @@ char* crypt_otr_accountname;
 char* crypt_otr_protocol;
 unsigned int crypt_otr_max_size;
 
-SV* crypt_otr_inject_cb;
+CV* crypt_otr_inject_cb;
 CV* crypt_otr_system_message_cb;
-SV* crypt_otr_connected_cb;
-SV* crypt_otr_unverified_cb;
-SV* crypt_otr_disconnected_cb;
-SV* crypt_otr_stillconnected_cb;
-SV* crypt_otr_error_cb;
-SV* crypt_otr_warning_cb;
-SV* crypt_otr_info_cb;
-SV* crypt_otr_new_fpr_cb;
+CV* crypt_otr_connected_cb;
+CV* crypt_otr_unverified_cb;
+CV* crypt_otr_disconnected_cb;
+CV* crypt_otr_stillconnected_cb;
+CV* crypt_otr_error_cb;
+CV* crypt_otr_warning_cb;
+CV* crypt_otr_info_cb;
+CV* crypt_otr_new_fpr_cb;
 
 OtrlUserState crypt_otr_get_userstate() { return crypt_otr_userstate; }
 char* crypt_otr_get_keyfile() { return crypt_otr_keyfile; }
@@ -55,16 +55,16 @@ char* crypt_otr_get_accountname() { return crypt_otr_accountname; }
 char* crypt_otr_get_protocol() { return crypt_otr_protocol; }
 unsigned int crypt_otr_get_max_message_size() { return crypt_otr_max_size; }
 
-SV* crypt_otr_get_inject_cb() { return  crypt_otr_inject_cb; }
+CV* crypt_otr_get_inject_cb() { return  crypt_otr_inject_cb; }
 CV* crypt_otr_get_system_message_cb() { return crypt_otr_system_message_cb; }
-SV* crypt_otr_get_connected_cb() { return crypt_otr_connected_cb; }
-SV* crypt_otr_get_unverified_cb() { return crypt_otr_unverified_cb; }
-SV* crypt_otr_get_disconnected_cb() { return crypt_otr_disconnected_cb; }
-SV* crypt_otr_get_stillconnected_cb() { return crypt_otr_stillconnected_cb; }
-SV* crypt_otr_get_error_cb() { return crypt_otr_error_cb; }
-SV* crypt_otr_get_warning_cb() { return crypt_otr_warning_cb; }
-SV* crypt_otr_get_info_cb() { return crypt_otr_info_cb; }
-SV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
+CV* crypt_otr_get_connected_cb() { return crypt_otr_connected_cb; }
+CV* crypt_otr_get_unverified_cb() { return crypt_otr_unverified_cb; }
+CV* crypt_otr_get_disconnected_cb() { return crypt_otr_disconnected_cb; }
+CV* crypt_otr_get_stillconnected_cb() { return crypt_otr_stillconnected_cb; }
+CV* crypt_otr_get_error_cb() { return crypt_otr_error_cb; }
+CV* crypt_otr_get_warning_cb() { return crypt_otr_warning_cb; }
+CV* crypt_otr_get_info_cb() { return crypt_otr_info_cb; }
+CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 
 
 void crypt_otr_set_userstate( OtrlUserState in_userstate ) { crypt_otr_userstate = in_userstate; }
@@ -75,19 +75,16 @@ void crypt_otr_set_accountname( char* in_accountname ) { crypt_otr_accountname =
 void crypt_otr_set_protocol( char* in_protocol ) { crypt_otr_protocol = in_protocol; }
 void crypt_otr_set_max_message_size ( int in_max_size ) { crypt_otr_max_size = in_max_size; }
 
-void crypt_otr_set_inject_cb( SV* in_inject_cb ){ crypt_otr_inject_cb = in_inject_cb;
-	printf( "Inject set to: %i\n", SvUV( crypt_otr_inject_cb ) );
-
- }
+void crypt_otr_set_inject_cb( CV* in_inject_cb ){ crypt_otr_inject_cb = in_inject_cb; }
 void crypt_otr_set_system_message_cb( CV* in_sys_mes_cb ){ crypt_otr_system_message_cb = in_sys_mes_cb; }
-void crypt_otr_set_connected_cb( SV* in_connected_cb ){ crypt_otr_connected_cb = in_connected_cb; }
-void crypt_otr_set_unverified_cb( SV* in_unver_cb ) { crypt_otr_unverified_cb = in_unver_cb; }
-void crypt_otr_set_disconnected_cb( SV* in_disconnected_cb ){ crypt_otr_disconnected_cb = in_disconnected_cb; }
-void crypt_otr_set_stillconnected_cb( SV* in_still_cb ) { crypt_otr_stillconnected_cb = in_still_cb; }
-void crypt_otr_set_error_cb( SV* in_error_cb ) { crypt_otr_error_cb = in_error_cb; }
-void crypt_otr_set_warning_cb( SV* in_warning_cb ) { crypt_otr_warning_cb = in_warning_cb; }
-void crypt_otr_set_info_cb( SV* in_info_cb ) { crypt_otr_info_cb = in_info_cb; }
-void crypt_otr_set_new_fpr_cb( SV* in_fpr_cb ) { crypt_otr_new_fpr_cb = in_fpr_cb; }
+void crypt_otr_set_connected_cb( CV* in_connected_cb ){ crypt_otr_connected_cb = in_connected_cb; }
+void crypt_otr_set_unverified_cb( CV* in_unver_cb ) { crypt_otr_unverified_cb = in_unver_cb; }
+void crypt_otr_set_disconnected_cb( CV* in_disconnected_cb ){ crypt_otr_disconnected_cb = in_disconnected_cb; }
+void crypt_otr_set_stillconnected_cb( CV* in_still_cb ) { crypt_otr_stillconnected_cb = in_still_cb; }
+void crypt_otr_set_error_cb( CV* in_error_cb ) { crypt_otr_error_cb = in_error_cb; }
+void crypt_otr_set_warning_cb( CV* in_warning_cb ) { crypt_otr_warning_cb = in_warning_cb; }
+void crypt_otr_set_info_cb( CV* in_info_cb ) { crypt_otr_info_cb = in_info_cb; }
+void crypt_otr_set_new_fpr_cb( CV* in_fpr_cb ) { crypt_otr_new_fpr_cb = in_fpr_cb; }
 
 
 

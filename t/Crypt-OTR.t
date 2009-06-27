@@ -1,3 +1,6 @@
+
+use lib "$ENV{HOME}/perllib/lib/perl/5.10.0";
+
 use Test::More qw/no_plan/;
 BEGIN { use_ok('Crypt::OTR') };
 
