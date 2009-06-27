@@ -69,18 +69,18 @@ void
 crypt_otr_init( )
 
 void 
-crypt_otr_establish( IN char* perl_username )
+crypt_otr_establish( IN struct crypt_otr_user_state* perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
 
 void
-crypt_otr_disconnect( IN char* perl_username )
+crypt_otr_disconnect( IN struct crypt_otr_user_state* perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
 
 SV*
-crypt_otr_process_sending( IN char* perl_username, IN char* perl_message )	
+crypt_otr_process_sending( IN crypt_otr_user_state* perl_state, IN char* perl_username, IN char* perl_message )	
 	OUTPUT:
 		RETVAL
 
 SV* 
-crypt_otr_process_receiving( IN char* perl_who, IN char* perl_message )
+crypt_otr_process_receiving( IN crypt_otr_user_state* perl_state, IN char* perl_who, IN char* perl_message )
 	OUTPUT:
 		RETVAL
 
@@ -93,12 +93,6 @@ crypt_otr_set_fprfile( IN char* perl_set )
 
 void
 crypt_otr_set_root( IN char* perl_set )
-
-void 
-crypt_otr_set_accountname( IN char* perl_set )
-
-void 
-crypt_otr_set_protocol( IN char* perl_set )
 
 void 
 crypt_otr_set_max_message_size ( IN int perl_set )

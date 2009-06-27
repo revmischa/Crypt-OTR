@@ -13,72 +13,73 @@
 
 //int crypt_otr_init( SV* sv_accountname, SV* sv_protocolname, SV* sv_max_message_size )
 int crypt_otr_init(  )
+{		
+	OTRL_INIT;
+}
+
+CryptOtrUserState crypt_otr_create_user( char* in_root )
 {
-	char* root;
+	char* root = in_root;
 	char* temp_keyfile;
 	char* temp_fingerprintfile;
 	
-	char* accountname = crypt_otr_get_accountname();
-	char* protocol = crypt_otr_get_protocol();
-	int max_msg = crypt_otr_get_max_message_size();
-
-	OtrlUserState userstate = crypt_otr_get_userstate();
-		
-	if( userstate ){
-		return 0;
-	}
-
-	OTRL_INIT;
-
-	userstate = otrl_userstate_create();	
-	crypt_otr_set_userstate( userstate );
-	printf( "userstate ptr = %i\n", userstate );
-				
-	root = expand_filename( crypt_otr_get_root() );
+	char* temp_key_name = PRIVKEY_FILE_NAME;
+	char* temp_fpr_name = STORE_FILE_NAME;
 	
-	temp_keyfile = malloc( (strlen(root) + strlen(accountname) + strlen(".key") + 1)*sizeof(char) ); // +1 for the \0
-	temp_fingerprintfile = malloc( (strlen(root) + strlen( accountname) + strlen(".fpr") + 1)*sizeof(char) );
-	sprintf( temp_keyfile, "%s%s.key", root, accountname);
-	sprintf( temp_fingerprintfile, "%s%s.fpr", root, accountname);
-				
-	crypt_otr_set_keyfile( temp_keyfile );
-	crypt_otr_set_fprfile( temp_fingerprintfile );
+	CryptOtrUserState crypt_state = crypt_otr_create_new_userstate();
 
-	if( otrl_privkey_read( userstate, temp_keyfile ) ) {
-		printf( "Could not read OTR key from %s\n", temp_keyfile);
-		crypt_otr_create_privkey( accountname, protocol );
-	}
-	else {
-		printf( "Loaded private key file from %s\n", temp_keyfile );
-	}
+	crypt_state->root = in_root;
+	
+	crypt_state->otrl_state = otrl_userstate_create();	
+	printf( "userstate ptr = %i\n", crypt_state->otrl_state );
+				
+	root = expand_filename( crypt_state->root );
+	
+	temp_keyfile = malloc( (strlen(root) + strlen( PRIVKEY_FILE_NAME ) + 1)*sizeof(char) ); // +1 for the \0
+
+	temp_fingerprintfile =  malloc( (strlen(root) + strlen( STORE_FILE_NAME ) + 1)*sizeof(char) ); // +1 for the \0 
+		
+	sprintf( temp_keyfile, "%s%s", root, temp_key_name );
+	sprintf( temp_fingerprintfile, "%s%s", root, temp_fpr_name );
+				
+	crypt_state->keyfile = temp_keyfile;
+	crypt_state->fprfile = temp_fingerprintfile;
 
 	free( temp_keyfile );
 	free( temp_fingerprintfile );
-			
-	return 0;
+	
+	return crypt_state;}
+
+
+void crypt_otr_establish( CryptOtrUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
+{	
+	
+	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
+		printf( "Could not read OTR key from %s\n", in_state->keyfile);
+		crypt_otr_create_privkey( in_state->otrl_state, in_account, in_proto );
+	}
+	else {
+		printf( "Loaded private key file from %s\n", in_state->keyfile );
+	}
+	
+
+	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 1 );
 }
 
 
-void crypt_otr_establish( char* username )
+void crypt_otr_disconnect( CryptOtrUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
 {
-	//puts( "crypt_otr_establish" );
-	crypt_otr_startstop( username, 1 );
+	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 0 );
 }
 
 
-void crypt_otr_disconnect( char* username )
-{
-	crypt_otr_startstop( username, 0 );
-}
-
-
-SV* crypt_otr_process_sending(char* who, char* sv_message )
+SV* crypt_otr_process_sending( CryptOtrUserState crypt_state, char* in_account, char* in_proto, int in_max, char* who, char* sv_message )
 {
 	char* newmessage = NULL;
 	char* message = strdup( sv_message );
-	OtrlUserState userstate = crypt_otr_get_userstate();
-	const char* accountname = crypt_otr_get_accountname();
-	const char* protocol = crypt_otr_get_protocol();
+	OtrlUserState userstate = crypt_state->otrl_state;
+	const char* accountname = in_account;
+	const char* protocol = in_proto;
 	char* username = who;
 	int err;
 	
@@ -125,7 +126,7 @@ SV* crypt_otr_process_sending(char* who, char* sv_message )
  * returns whether a otr_message was received
  * sets *message to NULL, when it was an internal otr message
  */
-SV*  crypt_otr_process_receiving( char* who, char* sv_message )
+SV*  crypt_otr_process_receiving( CryptOtrUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, char* who, char* sv_message )
 {
 	char* message = strdup( sv_message  );
 	//char* message = message_ptr;
@@ -133,11 +134,11 @@ SV*  crypt_otr_process_receiving( char* who, char* sv_message )
     	char* newmessage = NULL;
 	OtrlTLV* tlvs = NULL;
 	OtrlTLV* tlv = NULL;
-	OtrlUserState userstate;
-	char* username;
+	OtrlUserState userstate = crypt_state->otrl_state;
+	char* username = who;
 	int res;
-	const char* accountname;
-	const char* protocol;
+	const char* accountname = in_accountname;
+	const char* protocol = in_protocol;
 	ConnContext* context;
 	NextExpectedSMP nextMsg;
 
@@ -146,16 +147,11 @@ SV*  crypt_otr_process_receiving( char* who, char* sv_message )
 
 	//printf( "crypt_otr_process_receiving start\n" );
 	//printf( "who: %s\nmsg:\n%s\n", who, message );
-	
-	userstate = crypt_otr_get_userstate();
-	username = who;
-	accountname = crypt_otr_get_accountname();
-	protocol = crypt_otr_get_protocol();
 
-	res = otrl_message_receiving( userstate, &otr_ops, NULL, 
+	res = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
 							accountname, protocol, username, message,
 							&newmessage, &tlvs, NULL, NULL );
-	
+
 	if( newmessage ) {
 		char* ourm = malloc( strlen( newmessage ) + 1 );
 		if( ourm ) {
@@ -256,3 +252,8 @@ SV*  crypt_otr_process_receiving( char* who, char* sv_message )
 	//return sv_2mortal( newSVpv( message, 0 ));		
 }
 
+
+
+void crypt_otr_cleanup( CryptOtrUserState crypt_state ){
+	free( crypt_state );
+}
