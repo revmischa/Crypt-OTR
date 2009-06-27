@@ -6,17 +6,29 @@ crypt-otr-members.c
 crypt-otr-perl.c
 crypt-otr-private.c
 crypt-otr-utils.c
-crypt-otr.c
 crypt-otr.h
 fallback/const-c.inc
 fallback/const-xs.inc
 lib/Crypt/OTR.pm
 Makefile.PL
 MANIFEST
+META.yml			Module meta-data (added by MakeMaker)
+OTR.bs
+OTR.c
 OTR.inc
+OTR.o
 OTR.xs
 ppport.h
 README
 run
+script/otr.pl
+script/otr_receive.pl
+script/otr_send.pl
+script/socket/caller.pl
+script/socket/caller_2.pl
+script/socket/otr_perl_chat.pl
+script/socket/otr_test.pl
+script/socket/perl_chat.pl
+script/socket/receiver.pl
+script/socket/socket_chat.pl
 t/Crypt-OTR.t
-META.yml                                 Module meta-data (added by MakeMaker)
