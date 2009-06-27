@@ -70,10 +70,10 @@ CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 */ 
 
 //void crypt_otr_set_userstate( OtrlUserState in_userstate ) { crypt_otr_userstate = in_userstate; }
-void crypt_otr_set_keyfile	( CryptOTRUserState in_state, char* in_keyfile ) 	{ in_state->keyfile = in_keyfile; }
-void crypt_otr_set_fprfile	( CryptOTRUserState in_state, char* in_fprfile ) 	{ in_state->fprfile = in_fprfile; }
-void crypt_otr_set_root		( CryptOTRUserState in_state, char* in_root ) 	{ in_state->root = in_root; }
-void crypt_otr_set_max_message_size ( CryptOTRUserState in_state, int in_max_size ) { in_state->max_size = in_max_size; }
+//void crypt_otr_set_keyfile	( CryptOTRUserState in_state, char* in_keyfile ) 	{ in_state->keyfile = in_keyfile; }
+//void crypt_otr_set_fprfile	( CryptOTRUserState in_state, char* in_fprfile ) 	{ in_state->fprfile = in_fprfile; }
+//void crypt_otr_set_root		( CryptOTRUserState in_state, char* in_root ) 	{ in_state->root = in_root; }
+//void crypt_otr_set_max_message_size ( CryptOTRUserState in_state, int in_max_size ) { in_state->max_size = in_max_size; }
 
 void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){ in_state->inject_cb = in_inject_cb; }
 void crypt_otr_set_system_message_cb( CryptOTRUserState in_state, CV* in_sys_mes_cb ){ in_state->system_message_cb = in_sys_mes_cb; }

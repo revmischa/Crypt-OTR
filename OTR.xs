@@ -59,14 +59,14 @@ BOOT:
 	MY_CXT.warning_cb = NULL;
 	MY_CXT.info_cb = NULL;
 	MY_CXT.new_fpr_cb = NULL;
-	
-	crypt_otr_root = "~/.otr/";
-	crypt_otr_max_size = 2343;
 }
 
 
 void
 crypt_otr_init( )
+
+void
+crypt_otr_cleanup(  IN CryptOTRUserState perl_state )
 
 void 
 crypt_otr_establish( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
@@ -75,57 +75,44 @@ void
 crypt_otr_disconnect( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
 
 SV*
-crypt_otr_process_sending( IN CryptOTRUserState perl_state, IN char* perl_username, IN char* perl_message )	
+crypt_otr_process_sending( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username, IN char* perl_message )	
 	OUTPUT:
 		RETVAL
 
 SV* 
-crypt_otr_process_receiving( IN CryptOTRUserState perl_state, IN char* perl_who, IN char* perl_message )
+crypt_otr_process_receiving( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_who, IN char* perl_message )
 	OUTPUT:
 		RETVAL
 
+void 
+crypt_otr_set_inject_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_keyfile( IN char* perl_set )
+crypt_otr_set_system_message_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_fprfile( IN char* perl_set )
-
-void
-crypt_otr_set_root( IN char* perl_set )
+crypt_otr_set_connected_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_max_message_size ( IN int perl_set )
+crypt_otr_set_unverified_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_inject_cb( IN CV* perl_set )
+crypt_otr_set_stillconnected_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_system_message_cb( IN CV* perl_set )
+crypt_otr_set_disconnected_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_connected_cb( IN CV* perl_set )
+crypt_otr_set_error_cb( IN CryptOTRUserState perl_state, IN CV* perl_set ) 
 
 void 
-crypt_otr_set_unverified_cb( IN CV* perl_set )
+crypt_otr_set_warning_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_stillconnected_cb( IN CV* perl_set )
+crypt_otr_set_info_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
-crypt_otr_set_disconnected_cb( IN CV* perl_set )
-
-void 
-crypt_otr_set_error_cb( IN CV* perl_set ) 
-
-void 
-crypt_otr_set_warning_cb( IN CV* perl_set )
-
-void 
-crypt_otr_set_info_cb( IN CV* perl_set )
-
-void 
-crypt_otr_set_new_fpr_cb( IN CV* perl_set ) 
+crypt_otr_set_new_fpr_cb( IN CryptOTRUserState perl_state, IN CV* perl_set ) 
 
 
 
