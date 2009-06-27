@@ -114,10 +114,9 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
 
 =head1 DESCRIPTION
 
-Perl wrapper around libotr2 - see
-http://www.cypherpunks.ca/otr/README-libotr-3.2.0.txt
+Perl wrapper around libotr2 - see http://www.cypherpunks.ca/otr/README-libotr-3.2.0.txt
 
-=head2 EXPORT
+=head1 EXPORT
 
 None by default.
 
@@ -128,8 +127,7 @@ None by default.
 
 =item init(%opts)
 
-This method sets up OTR and initializes the global OTR context. It is
-probably unsafe to call this more than once
+This method sets up OTR and initializes the global OTR context. It is probably unsafe to call this more than once
 
 Options:
  'account_name'     => name of the account in your application
@@ -178,13 +176,9 @@ sub new {
 
 Set a callback to be called when various events happen:
 
-  inject: Called when establishing a connection, or sending a
-  fragmented message. This should send your message over whatever
-  communication channel your application is using.
+  inject: Called when establishing a connection, or sending a fragmented message. This should send your message over whatever communication channel your application is using.
 
-  otr_message: Called when OTR wants to display a notification. Return
-  1 if the message has been displayed, return 0 if you want OTR to
-  display the message inline.
+  otr_message: Called when OTR wants to display a notification. Return 1 if the message has been displayed, return 0 if you want OTR to display the message inline.
 
   connect: Called when a verified conversation is established
 
@@ -216,9 +210,7 @@ sub set_callback {
 
 =item establish($user_name)
 
-Attemps to begin an OTR-encrypted conversation with $user_name. This
-will call the inject callback with a message containing an OTR
-connection attempt.
+Attemps to begin an OTR-encrypted conversation with $user_name. This will call the inject callback with a message containing an OTR connection attempt.
 
 =cut
 
@@ -231,8 +223,7 @@ sub establish {
 
 =item encrypt($user_name, $plaintext)
 
-Encrypts $plaintext for $user_name. Returns undef unless an encrypted
-message has been generated, in which case it returns that.
+Encrypts $plaintext for $user_name. Returns undef unless an encrypted message has been generated, in which case it returns that.
 
 =cut
 
@@ -245,8 +236,7 @@ sub encrypt {
 
 =item decrypt($user_name, $ciphertext)
 
-Decrypt a message from $user_name, returns plaintext if successful,
-otherwise undef
+Decrypt a message from $user_name, returns plaintext if successful, otherwise undef
 
 =cut
 
@@ -270,6 +260,7 @@ sub finish {
     return crypt_otr_disconnect($user_name);
 }
 
+=back
 
 =head1 SEE ALSO
 
@@ -278,7 +269,9 @@ http://www.cypherpunks.ca/otr
 =head1 TODO
 
 - Data directory configuration
+
 - More informational callbacks
+
 - Socialist Millionaire Protocol (verify key fingerprints)
 
 =head1 AUTHOR
@@ -290,9 +283,7 @@ Mischa Spiegelmock, E<lt>mspiegelmock@gmail.comE<gt>
 
 Copyright (C) 2009 by Patrick Tierney, Mischa Spiegelmock
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
-at your option, any later version of Perl 5 you may have available.
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.8.8 or, at your option, any later version of Perl 5 you may have available.
 
 =cut
 
