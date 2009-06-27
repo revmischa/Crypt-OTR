@@ -1,6 +1,4 @@
 Changes
-const-c.inc
-const-xs.inc
 crypt-otr-callbacks.c
 crypt-otr-members.c
 crypt-otr-perl.c
@@ -13,10 +11,8 @@ lib/Crypt/OTR.pm
 Makefile.PL
 MANIFEST
 META.yml			Module meta-data (added by MakeMaker)
-OTR.bs
 OTR.c
 OTR.inc
-OTR.o
 OTR.xs
 ppport.h
 README
