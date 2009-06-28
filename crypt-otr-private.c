@@ -258,7 +258,7 @@ void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char
 		printf( "Injecting OTR message\n" );
 			
 		msg = otrl_proto_default_query_msg( ctx->accountname, policy );
-		inject_message_cb( NULL, ctx->accountname, ctx->protocol, ctx->username, msg );
+		inject_message_cb( crypt_state, ctx->accountname, ctx->protocol, ctx->username, msg );
 	
 		free( msg );
 	}
@@ -271,9 +271,9 @@ static void crypt_otr_message_disconnect( CryptOTRUserState crypt_state,  ConnCo
 	OtrlUserState userstate = crypt_state->otrl_state;
 	
 	if( ctx->msgstate == OTRL_MSGSTATE_ENCRYPTED )
-		gone_insecure_cb( NULL, ctx );
+		gone_insecure_cb( crypt_state, ctx );
 
-	otrl_message_disconnect( userstate, &otr_ops, NULL, ctx->accountname, ctx->protocol, ctx->username );
+	otrl_message_disconnect( userstate, &otr_ops, crypt_state, ctx->accountname, ctx->protocol, ctx->username );
 }
 
 
