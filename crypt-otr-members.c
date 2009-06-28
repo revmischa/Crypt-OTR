@@ -90,8 +90,8 @@ void crypt_otr_set_info_cb( CryptOTRUserState in_state, CV* in_info_cb ) { crypt
 void crypt_otr_set_new_fpr_cb( CryptOTRUserState in_state, CV* in_fpr_cb ) { crypt_otr_store_callback( in_state->new_fpr_cb, in_fpr_cb); }
 
 
-void crypt_otr_store_callback( CV** struct_callback, CV* perl_callback ){
+void crypt_otr_store_callback( CV* struct_callback, CV* perl_callback ){
 	SvREFCNT_inc(perl_callback);
-	*struct_callback = perl_callback;
+	struct_callback = perl_callback;
 }
 
