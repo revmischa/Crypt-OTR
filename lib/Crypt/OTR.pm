@@ -151,11 +151,11 @@ sub new {
 
     my $account_name = delete $opts{account_name} || 'crypt_otr_user';
     my $protocol      = delete $opts{protocol} || 'crypt_otr';
-    my $max_message_size = delete $opts{max_message_size} || 2343;  # OSCAR max
+    my $max_message_size = delete $opts{max_message_size} || 0;
     my $config_dir = delete $opts{config_dir} || "$ENV{HOME}/.otr/";
 
     croak "$config_dir is not writable"
-        unless -w $config_dir;
+        if -e $config_dir && ! -w $config_dir;
 
     mkdir $config_dir unless -e $config_dir;
     croak "unable to create $config_dir"
