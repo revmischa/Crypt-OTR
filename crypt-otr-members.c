@@ -75,7 +75,7 @@ CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 //void crypt_otr_set_root		( CryptOTRUserState in_state, char* in_root ) 	{ in_state->root = in_root; }
 //void crypt_otr_set_max_message_size ( CryptOTRUserState in_state, int in_max_size ) { in_state->max_size = in_max_size; }
 
-#define CRYPT_OTR_INSTALL_CALLBACK (userstate_cb, perl_cb) SvREFCNT_inc(perl_cb); userstate_cb = perl_cb;
+#define CRYPT_OTR_INSTALL_CALLBACK(userstate_cb, perl_cb) SvREFCNT_inc(perl_cb); userstate_cb = perl_cb;
 
 void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){ CRYPT_OTR_INSTALL_CALLBACK( in_state->inject_cb, in_inject_cb ); }
 
