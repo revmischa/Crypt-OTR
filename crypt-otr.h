@@ -38,6 +38,9 @@ struct crypt_otr_user_state {
 	CV* new_fpr_cb;
 };
 
+
+void crypt_otr_store_callback( CV* struct_callback, CV* perl_callback );
+
 char *expand_filename(const char *fname);
 
 void 		crypt_otr_handle_connected(CryptOTRUserState in_state, ConnContext* context);
