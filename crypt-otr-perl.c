@@ -28,7 +28,7 @@ CryptOTRUserState crypt_otr_create_user( char* in_root )
 	
 	CryptOTRUserState crypt_state = crypt_otr_create_new_userstate();
 
-	crypt_state->root = in_root;
+	crypt_state->root = strdup( in_root );
 	
 	crypt_state->otrl_state = otrl_userstate_create();	
 	printf( "userstate ptr = %i\n", crypt_state->otrl_state );
@@ -69,6 +69,7 @@ void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in
 		printf( "Loaded private key file from %s\n", in_state->keyfile );
 	}
 	
+	dumpState( in_state );
 
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 1 );
 }
@@ -268,3 +269,4 @@ void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
 	free( crypt_state );
 
 }
+
