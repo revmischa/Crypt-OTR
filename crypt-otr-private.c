@@ -8,7 +8,7 @@
 
 static void
 crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
-{
+{	
 	dSP;
 	
 	ENTER;
@@ -64,6 +64,8 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 				   const char* accountname, const char* protocol, const char* username, 
 				   const char* title, const char* primary, const char* secondary )
 {
+	puts( "crypt_otr_notify" );
+
 	dSP;
 	
 	ENTER;
