@@ -83,7 +83,7 @@ sub init {
     my $otr = new Crypt::OTR(
                              account_name     => $user,
                              protocol_name    => "crypt-otr-test",
-                             max_message_size => 16, 
+                             max_message_size => 2000, 
                              );
 
     my $inject = sub {

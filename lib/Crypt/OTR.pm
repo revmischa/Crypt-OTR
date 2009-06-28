@@ -199,8 +199,10 @@ Set a callback to be called when various events happen:
 
 =cut
 
+        use Data::Dumper;
 sub set_callback {
     my ($self, $action, $cb) = @_;
+
 
     # wrap in method call
     my $wrapped_cb = sub {
@@ -217,7 +219,7 @@ sub set_callback {
     my $cb_method = $callback_map->{$action}
     or croak "unknown callback $action";
 
-    $cb_method->($self->_us, $cb);
+    $cb_method->($self->_us, $wrapped_cb);
 }
 
 
@@ -244,6 +246,7 @@ Encrypts $plaintext for $user_name. Returns undef unless an encrypted message ha
 sub encrypt {
     my ($self, $user_name, $plaintext) = @_;
 
+    return undef unless $plaintext;
     return crypt_otr_process_sending($self->_args, $user_name, $plaintext);
 }
 
@@ -257,6 +260,7 @@ Decrypt a message from $user_name, returns plaintext if successful, otherwise un
 sub decrypt {
     my ($self, $user_name, $ciphertext) = @_;
 
+    return undef unless $ciphertext;
     return crypt_otr_process_receiving($self->_args, $user_name, $ciphertext);
 }
 
