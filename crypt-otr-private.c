@@ -289,6 +289,7 @@ ConnContext* crypt_otr_get_context( CryptOTRUserState crypt_state, char* account
 	
 	printf( "crypt_otr_get_context accountname: %s\nuserstate: %i\nprotocol: %s\n", accountname, userstate, protocol );
 	
+	/* Finds the context.  The fifth parameter is true, so it creates a context if one didn't exist already. */
 	ctx = otrl_context_find( userstate, username, accountname, protocol, 1, &null, NULL, NULL );
 
 	return ctx;

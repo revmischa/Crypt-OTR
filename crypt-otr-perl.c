@@ -153,8 +153,8 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	if( !who || !message )
 		return sv_2mortal( newSVpv( newmessage, 0 ));
 
-	//printf( "crypt_otr_process_receiving start\n" );
-	//printf( "who: %s\nmsg:\n%s\n", who, message );
+	printf( "crypt_otr_process_receiving start\n" );
+	printf( "who: %s\nmsg:\n%s\n", who, message );
 
 	res = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
 							accountname, protocol, username, message,
