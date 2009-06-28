@@ -88,6 +88,7 @@ sub init {
 
     my $inject = sub {
         my ($account_name, $protocol, $dest_account, $message) = @_;
+        warn "inject called with: @_\n";
         push @$dest, $message;
     };
 

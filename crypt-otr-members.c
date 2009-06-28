@@ -75,7 +75,9 @@ CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 //void crypt_otr_set_root		( CryptOTRUserState in_state, char* in_root ) 	{ in_state->root = in_root; }
 //void crypt_otr_set_max_message_size ( CryptOTRUserState in_state, int in_max_size ) { in_state->max_size = in_max_size; }
 
-void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){ crypt_otr_store_callback( in_state->inject_cb, in_inject_cb ); }
+#define CRYPT_OTR_INSTALL_CALLBACK (userstate_cb, perl_cb) SvREFCNT_inc(perl_cb); userstate_cb = perl_cb;
+
+void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){ CRYPT_OTR_INSTALL_CALLBACK( in_state->inject_cb, in_inject_cb ); }
 
 void crypt_otr_set_system_message_cb( CryptOTRUserState in_state, CV* in_sys_mes_cb ){ crypt_otr_store_callback (in_state->system_message_cb, in_sys_mes_cb); }
 void crypt_otr_set_connected_cb( CryptOTRUserState in_state, CV* in_connected_cb ){ crypt_otr_store_callback( in_state->connected_cb, in_connected_cb); }
@@ -88,8 +90,8 @@ void crypt_otr_set_info_cb( CryptOTRUserState in_state, CV* in_info_cb ) { crypt
 void crypt_otr_set_new_fpr_cb( CryptOTRUserState in_state, CV* in_fpr_cb ) { crypt_otr_store_callback( in_state->new_fpr_cb, in_fpr_cb); }
 
 
-void crypt_otr_store_callback( CV* struct_callback, CV* perl_callback ){
+void crypt_otr_store_callback( CV** struct_callback, CV* perl_callback ){
 	SvREFCNT_inc(perl_callback);
-	struct_callback = perl_callback;
+	*struct_callback = perl_callback;
 }
 
