@@ -40,11 +40,11 @@ struct crypt_otr_user_state {
 
 char *expand_filename(const char *fname);
 
-void 		crypt_otr_handle_connected(ConnContext* context);
-void 		crypt_otr_handle_trusted_connection( char* username );
-void 		crypt_otr_handle_unverified_connection( char* username );
-void 		crypt_otr_handle_disconnection( char* username );
-void 		crypt_otr_handle_stillconnected( char* username );
+void 		crypt_otr_handle_connected(CryptOTRUserState in_state, ConnContext* context);
+void 		crypt_otr_handle_trusted_connection( CryptOTRUserState in_state,  char* username );
+void 		crypt_otr_handle_unverified_connection( CryptOTRUserState in_state, char* username );
+void 		crypt_otr_handle_disconnection( CryptOTRUserState in_state, char* username );
+void 		crypt_otr_handle_stillconnected( CryptOTRUserState in_state, char* username );
 
 static int 	crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, const char* message );
 static void 	crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message );
@@ -74,9 +74,9 @@ static int 		display_otr_message_cb(CryptOTRUserState opdata, const char *accoun
 static void 		update_context_list_cb(void *opdata);
 static void 		confirm_fingerprint_cb(CryptOTRUserState opdata, OtrlUserState us, const char *accountname, const char *protocol, const char *username, unsigned char fingerprint[20]);
 static void 		write_fingerprints_cb(CryptOTRUserState opdata);
-static void 		gone_secure_cb(void *opdata, ConnContext *context);
-static void 		gone_insecure_cb(void *opdata, ConnContext *context);
-static void 		still_secure_cb(void *opdata, ConnContext *context, int is_reply);
+static void 		gone_secure_cb(CryptOTRUserState opdata, ConnContext *context);
+static void 		gone_insecure_cb(CryptOTRUserState opdata, ConnContext *context);
+static void 		still_secure_cb(CryptOTRUserState opdata, ConnContext *context, int is_reply);
 static void 		log_message_cb(void *opdata, const char *message);
 static int 		max_message_size_cb(CryptOTRUserState opdata, ConnContext *context);
 static const char* 	account_name_cb( CryptOTRUserState opdata, const char *account, const char *protocol );

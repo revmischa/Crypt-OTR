@@ -172,7 +172,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	tlv = otrl_tlv_find( tlvs, OTRL_TLV_DISCONNECTED );
 	if( tlv ) {
 		/* Notify the user that the other side disconnected */
-		crypt_otr_handle_disconnection( username );
+		crypt_otr_handle_disconnection( crypt_state, username );
 	}
 
 	/* Keep track of our current progress in the Socialist Millionaires'
@@ -182,14 +182,14 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 		nextMsg = context->smstate->nextExpected;
 
 		if( context->smstate->sm_prog_state == OTRL_SMP_PROG_CHEATED ) {
-			crypt_otr_abort_smp( context );
+			crypt_otr_abort_smp( crypt_state, context );
 			context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 			context->smstate->sm_prog_state = OTRL_SMP_PROG_OK;
 		} else {
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1Q);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT1)
-					crypt_otr_abort_smp(context);
+					crypt_otr_abort_smp(crypt_state, context);
 				else {
 					char *question = (char *)tlv->data;
 					char *eoq = memchr(question, '\0', tlv->len);
@@ -201,7 +201,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT1)
-					crypt_otr_abort_smp(context);
+					crypt_otr_abort_smp(crypt_state, context);
 				else {
 					crypt_otr_ask_socialist_millionaires(context);
 				}
@@ -209,7 +209,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT2)
-					crypt_otr_abort_smp(context);
+					crypt_otr_abort_smp(crypt_state, context);
 				else {
 					context->smstate->nextExpected = OTRL_SMP_EXPECT4;
 				}
@@ -217,7 +217,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP3);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT3)
-					crypt_otr_abort_smp(context);
+					crypt_otr_abort_smp(crypt_state, context);
 				else {
 					crypt_otr_completed_smp( context );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
@@ -226,7 +226,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP4);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT4)
-					crypt_otr_abort_smp(context);
+					crypt_otr_abort_smp(crypt_state, context);
 				else {
 					crypt_otr_completed_smp( context );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;

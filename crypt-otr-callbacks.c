@@ -12,7 +12,7 @@ static OtrlPolicy policy_cb(void *opdata, ConnContext *context)
     	OtrlPolicy policy = OTRL_POLICY_DEFAULT;
     
     if (!context) return policy;
-
+c
     return crypt_otr_get_policy(account, context->username);
 	*/
 	
@@ -106,20 +106,20 @@ static void write_fingerprints_cb( CryptOTRUserState opdata)
 	otrl_privkey_write_fingerprints( opdata->otrl_state, opdata->fprfile );
 }
 
-static void gone_secure_cb(void *opdata, ConnContext *context)
+static void gone_secure_cb(CryptOTRUserState opdata, ConnContext *context)
 {
-    crypt_otr_handle_connected(context);
+	crypt_otr_handle_connected(opdata, context);
 }
 
-static void gone_insecure_cb(void *opdata, ConnContext *context)
+static void gone_insecure_cb(CryptOTRUserState opdata, ConnContext *context)
 {
-    crypt_otr_handle_disconnection(context->username);
+	crypt_otr_handle_disconnection(opdata, context->username);
 }
 
-static void still_secure_cb(void *opdata, ConnContext *context, int is_reply)
+static void still_secure_cb(CryptOTRUserState opdata, ConnContext *context, int is_reply)
 {
     if (is_reply == 0) {
-	crypt_otr_handle_stillconnected(context->username);
+	    crypt_otr_handle_stillconnected(opdata, context->username);
     }
 }
 

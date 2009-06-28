@@ -95,7 +95,7 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 }
 
 
-void crypt_otr_handle_connected(ConnContext* context)
+void crypt_otr_handle_connected(CryptOTRUserState crypt_state, ConnContext* context)
 {	
 	char* username = context->username;
 	TrustLevel level;
@@ -108,11 +108,11 @@ void crypt_otr_handle_connected(ConnContext* context)
 
 	switch(level) {
 	case TRUST_PRIVATE:
-		crypt_otr_handle_trusted_connection( username );
+		crypt_otr_handle_trusted_connection( crypt_state, username );
 		break;
 
 	case TRUST_UNVERIFIED:
-		crypt_otr_handle_unverified_connection( username );
+		crypt_otr_handle_unverified_connection( crypt_state, username );
 		break;
 
 	default:
@@ -124,7 +124,7 @@ void crypt_otr_handle_connected(ConnContext* context)
 }
 
 
-void crypt_otr_callback_one_string( SV* callback_sub, char* username )
+void crypt_otr_callback_one_string( CV* callback_sub, char* username )
 {
 	dSP;
 	
@@ -143,36 +143,36 @@ void crypt_otr_callback_one_string( SV* callback_sub, char* username )
 }
 
 /* Send the username, basically saying that a trusted conversation has been started with username */
-void crypt_otr_handle_trusted_connection( char* username )
+void crypt_otr_handle_trusted_connection( CryptOTRUserState crypt_state, char* username )
 {
-	crypt_otr_callback_one_string( crypt_otr_get_connected_cb(), username );
+	crypt_otr_callback_one_string( crypt_state->connected_cb, username );
 } 
 
 /* Send the username, basically saying that an unverified conversation has been started with username */
-void crypt_otr_handle_unverified_connection( char* username )
+void crypt_otr_handle_unverified_connection( CryptOTRUserState crypt_state, char* username )
 {
-	crypt_otr_callback_one_string( crypt_otr_get_unverified_cb(), username );
+	crypt_otr_callback_one_string( crypt_state->unverified_cb, username );
 }
 
 /* Send the username, saying that a conversation has ended  with username */
-void crypt_otr_handle_disconnection( char* username )
+void crypt_otr_handle_disconnection( CryptOTRUserState crypt_state, char* username )
 {
-	crypt_otr_callback_one_string( crypt_otr_get_disconnected_cb(), username );
+	crypt_otr_callback_one_string( crypt_state->disconnected_cb, username );
 }
 
 /* Send the username, saying that is still connected  with username */
-void crypt_otr_handle_stillconnected( char* username )
+void crypt_otr_handle_stillconnected( CryptOTRUserState crypt_state, char* username )
 {
-	crypt_otr_callback_one_string( crypt_otr_get_stillconnected_cb(), username );
+	crypt_otr_callback_one_string( crypt_state->stillconnected_cb, username );
 }
 	
 
 
 /* Abort the SMP protocol.  Used when malformed or unexpected messages
  * are received. */
-void crypt_otr_abort_smp( ConnContext* context )
+void crypt_otr_abort_smp( CryptOTRUserState crypt_state, ConnContext* context )
 {
-	otrl_message_abort_smp( crypt_otr_get_userstate(), &otr_ops, NULL, context);
+	otrl_message_abort_smp( crypt_state->otrl_state, &otr_ops, NULL, context);
 }
 
 void crypt_otr_completed_smp( ConnContext* context )
