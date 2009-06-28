@@ -75,7 +75,11 @@ CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 //void crypt_otr_set_root		( CryptOTRUserState in_state, char* in_root ) 	{ in_state->root = in_root; }
 //void crypt_otr_set_max_message_size ( CryptOTRUserState in_state, int in_max_size ) { in_state->max_size = in_max_size; }
 
-void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){ in_state->inject_cb = in_inject_cb; }
+void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){
+  SvREFCNT_inc(in_inject_cb);
+  in_state->inject_cb = in_inject_cb;
+}
+
 void crypt_otr_set_system_message_cb( CryptOTRUserState in_state, CV* in_sys_mes_cb ){ in_state->system_message_cb = in_sys_mes_cb; }
 void crypt_otr_set_connected_cb( CryptOTRUserState in_state, CV* in_connected_cb ){ in_state->connected_cb = in_connected_cb; }
 void crypt_otr_set_unverified_cb( CryptOTRUserState in_state, CV* in_unver_cb ) { in_state->unverified_cb = in_unver_cb; }

@@ -87,12 +87,8 @@ sub init {
                              );
 
     my $inject = sub {
-        warn "\ninject\n";
-        my ($self, $account_name, $protocol, $dest_account, $message) = @_;
-        
-        sync(sub {
-            push @$dest, $message;
-        });
+        my ($account_name, $protocol, $dest_account, $message) = @_;
+        push @$dest, $message;
     };
 
     my $unverified = sub {
@@ -100,9 +96,7 @@ sub init {
         my ($otr, $other_user) = @_;
         print "Unverified conversation started with $other_user\n";
 
-        sync(sub {
-            $established->{$user} = 1;
-        });
+        $established->{$user} = 1;
     };
 
     $otr->set_callback('inject' => $inject);

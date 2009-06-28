@@ -264,6 +264,9 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
 
+  if (crypt_state->inject_cb)
+    SvREFCNT_dec(crypt_state->inject_cb);
+
 	free( crypt_state->keyfile );
 	free( crypt_state->fprfile );
 	free( crypt_state );
