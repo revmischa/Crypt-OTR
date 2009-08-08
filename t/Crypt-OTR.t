@@ -53,22 +53,31 @@ sub test_multithreading {
     my $bob_thread = async {
         my $bob = test_init($u2, $bob_buf);
         
-        sync(sub {
-            $bob->establish($u1);
-        });
+        # establish
+        {
+            sync(sub {
+                $bob->establish($u1);
+            });
 
-        select undef, undef, undef, 1.2;
+            select undef, undef, undef, 1.2;
 
-        my $msg = shift @$bob_buf;
-        ok($msg, "Injected OTR setup message");
-        my $resp = $bob->decrypt($u1, $msg);
-        sync(sub {
-            $bob->encrypt($u1, "message two");
-        });
+            my $msg = shift @$bob_buf;
+            ok($msg, "Injected OTR setup message");
+            my $resp = $bob->decrypt($u1, $msg);
 
-        sync(sub {
-            ok($established->{$u1}, "Connection with $u1 established");
-        });
+            sync(sub {
+                ok($established->{$u1}, "Connection with $u1 established");
+            });
+        }
+        
+        # encrypt message
+        {
+            my $enc_resp;
+            sync(sub {
+                $enc_resp = $bob->encrypt($u1, "message two");
+            });
+        }
+
     };
 
     $_->join foreach ($alice_thread, $bob_thread);
