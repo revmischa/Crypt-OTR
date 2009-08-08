@@ -17,14 +17,13 @@ int crypt_otr_init(  )
 	OTRL_INIT;
 }
 
-CryptOTRUserState crypt_otr_create_user( char* in_root )
+CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char* protocol )
 {
+	printf( "_Creating user\n" );
+
 	char* root = in_root;
 	char* temp_keyfile;
 	char* temp_fingerprintfile;
-	
-	char* temp_key_name = PRIVKEY_FILE_NAME;
-	char* temp_fpr_name = STORE_FILE_NAME;
 	
 	CryptOTRUserState crypt_state = crypt_otr_create_new_userstate();
 
@@ -32,26 +31,27 @@ CryptOTRUserState crypt_otr_create_user( char* in_root )
 	
 	crypt_state->otrl_state = otrl_userstate_create();	
 	printf( "userstate ptr = %i\n", crypt_state->otrl_state );
-				
-	root = expand_filename( crypt_state->root );
-	
-	temp_keyfile = malloc( (strlen(root) + strlen( PRIVKEY_FILE_NAME ) + 1)*sizeof(char) ); // +1 for the \0
 
-	temp_fingerprintfile =  malloc( (strlen(root) + strlen( STORE_FILE_NAME ) + 1)*sizeof(char) ); // +1 for the \0 
+	
+	temp_keyfile = malloc( (strlen(in_root) + 
+					    strlen(PRIVKEY_FILE_NAME) +
+					    strlen(account_name) +
+					    strlen(protocol) +
+					    2 + 1)*sizeof(char) ); // +1 for the \0
+
+	temp_fingerprintfile =  malloc( (strlen(in_root) + 
+							   strlen(STORE_FILE_NAME) +
+							   strlen(account_name) +
+							   strlen(protocol) + 
+							   2 + 1)*sizeof(char) ); // +1 for the \0 
 		
-	sprintf( temp_keyfile, "%s%s", root, temp_key_name );
-	sprintf( temp_fingerprintfile, "%s%s", root, temp_fpr_name );
+	sprintf( temp_keyfile, "%s%s-%s-%s", in_root, PRIVKEY_FILE_NAME, account_name, protocol);
+	sprintf( temp_fingerprintfile, "%s%s-%s-%s", in_root, STORE_FILE_NAME, account_name, protocol);
 				
 	crypt_state->keyfile = temp_keyfile;
 	crypt_state->fprfile = temp_fingerprintfile;
 
-	printf( "Saved keyfile %s\n", crypt_state->keyfile );
-
-	//free( temp_keyfile );
-	//free( temp_fingerprintfile );
-	
-	printf( "Made State = %i\n", crypt_state );
-
+	printf( "Set keyfile for %s to  %s\n", account_name, crypt_state->keyfile );
 	
 	return crypt_state;
 }
@@ -59,6 +59,7 @@ CryptOTRUserState crypt_otr_create_user( char* in_root )
 
 void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
 {		
+	printf( "_crypt_otr_establish\n" );
 	printf( "Got State = %i\n", in_state );
 		
 	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
@@ -77,12 +78,14 @@ void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in
 
 void crypt_otr_disconnect( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
 {
+	printf( "_crypt_otr_disconnect\n" );
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 0 );
 }
 
 
 SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, char* in_proto, int in_max, char* who, char* sv_message )
 {
+	printf( "_crypt_otr_process_sending\n" );
 	char* newmessage = NULL;
 	char* message = strdup( sv_message );
 	OtrlUserState userstate = crypt_state->otrl_state;
@@ -136,6 +139,7 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
  */
 SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, char* who, char* sv_message )
 {
+	printf( "_crypt_otr_process_receiving\n" );
 	char* message = strdup( sv_message  );
 	//char* message = message_ptr;
 	char* message_out = NULL;

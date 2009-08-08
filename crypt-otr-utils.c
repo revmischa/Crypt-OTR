@@ -30,7 +30,7 @@ char *expand_filename(const char *fname)
 
 void dumpState( CryptOTRUserState crypt_state  )
 {
-	printf( "CryptOTRUserState:\nptr=>%i\nroot=>%s\nkeyfile=>n%s\nfprfile=>%s\nmax_size=>%i\n\ninject_cb=>%i\nsystem_message_cb=>%i\n%i\n%i\n%i\n%i\n%i\n%i\n%i\n%i\n\n",
+	printf( "CryptOTRUserState:\nptr=>%i\nroot=>%s\nkeyfile=>%s\nfprfile=>%s\nmax_size=>%i\n\ninject_cb=>%i\nsystem_message_cb=>%i\n%i\n%i\n%i\n%i\n%i\n%i\n%i\n%i\n\n",
 		   crypt_state->otrl_state,
 		   crypt_state->root,
 		   crypt_state->keyfile,

@@ -68,12 +68,10 @@ crypt_otr_init( )
 void
 crypt_otr_cleanup(  IN CryptOTRUserState perl_state )
 
-
 CryptOTRUserState 
-crypt_otr_create_user( IN char* perl_root )
+crypt_otr_create_user( IN char* perl_root, IN char* perl_account, IN char* perl_proto  )
 	OUTPUT:
 		RETVAL
-
 
 void 
 crypt_otr_establish( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
@@ -120,8 +118,6 @@ crypt_otr_set_info_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
 crypt_otr_set_new_fpr_cb( IN CryptOTRUserState perl_state, IN CV* perl_set ) 
-
-
 
 
 

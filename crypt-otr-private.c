@@ -12,6 +12,19 @@ crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, co
   printf("crypt_otr_inject_message - injecting message [%s]\n", message);
 	dSP;
 	
+	//static char* return_stack[5];
+
+	//return_stack[0] = account;
+	//return_stack[1] = protocol;
+	//return_stack[2] = recipient;
+	//return_stack[3] = message;
+	//return_stack[4] = NULL; 	
+	
+	//printf( "About to call perl_call_argv\n" );
+	//perl_call_argv( crypt_state->inject_cb, G_DISCARD, return_stack ); 
+	//printf( "Called perl_call_argv\n" );
+
+	
 	ENTER;
 	SAVETMPS;
 
@@ -33,6 +46,8 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 						 const char* protocol, const char* username, 
 						 const char* message )
 {
+	printf( "**Received message**\n" );
+
 	dSP;
 	int num_items_on_stack;
 	
@@ -237,13 +252,15 @@ void crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char* accoun
  
 void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username, int start )
 {	
+	printf( "_crypt_otr_startstop\n" );
 	char* msg = NULL;
 	ConnContext* ctx = crypt_otr_get_context( crypt_state, accountname, protocol, username );
 	
 	OtrlUserState userstate = crypt_state->otrl_state;
 
-	printf( "crypt_otr_startstop userstate: %i\ncontext: %i\nusername: %s\n", userstate, ctx, username );
-	
+	printf( "crypt_otr_startstop userstate: %i\ncontext: %u\nusername: %s\n", userstate, ctx, username );
+	//perror( "crypt_otr_startstop userstate: " ); perror( userstate );	
+
 	if( !userstate || !ctx )
 		return;
 	

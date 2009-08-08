@@ -161,7 +161,7 @@ sub new {
     croak "unable to create $config_dir"
         unless -e $config_dir;
 
-    my $state = crypt_otr_create_user($config_dir);
+    my $state = crypt_otr_create_user($config_dir, $account_name, $protocol);
 
 #    crypt_otr_set_accountname($state, $account_name)
 #        if defined $account_name;
@@ -212,7 +212,7 @@ sub set_callback {
     my $callback_map = {
         'inject' => \&crypt_otr_set_inject_cb,
         'otr_message' => \&crypt_otr_set_system_message_cb,
-        'connect' => \&crypt_otr_set_connect_cb,
+        'connect' => \&crypt_otr_set_connected_cb,
         'unverified' => \&crypt_otr_set_unverified_cb,
     };
 
