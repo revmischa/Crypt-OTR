@@ -272,9 +272,10 @@ void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char
 		OtrlPolicy policy = policy_cb( NULL, ctx );
 		// check policy here to make sure it iss set to encrypted
 			
-		printf( "Injecting OTR message\n" );
+
 			
 		msg = otrl_proto_default_query_msg( ctx->accountname, policy );
+		printf( "Injecting OTR message: %s\n", msg );
 		inject_message_cb( crypt_state, ctx->accountname, ctx->protocol, ctx->username, msg );
 	
 		free( msg );

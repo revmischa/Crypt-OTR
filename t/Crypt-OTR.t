@@ -49,6 +49,8 @@ sub test_multithreading {
 			sleep 1;
 
 			my $msg = shift @$alice_buf;
+			print "Shift: $msg\n";
+
 			if( $msg ){
 				print "$u1 received message from $u2: $msg\n";
 				#ok($msg, "Injected OTR setup message");
@@ -115,7 +117,7 @@ sub test_init {
                              );
 
     my $inject = sub {
-        my ($account_name, $protocol, $dest_account, $message) = @_;
+        my ( $lol_dongs, $account_name, $protocol, $dest_account, $message) = @_;
 		print '"Sending" message from ' . "$account_name to $dest_account\n$message\n";
         push @$dest, $message;
     };
