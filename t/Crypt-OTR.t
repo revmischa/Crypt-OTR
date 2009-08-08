@@ -40,13 +40,10 @@ sub test_multithreading {
         });
 
         sleep 1;
-        warn "\nalice buf: @$alice_buf\n";
 
         my $msg = shift @$alice_buf;
         ok($msg, "Injected OTR setup message");
-        my $resp = $alice->decrypt($msg);
-
-        warn "alice resp = $resp\n";
+        my $resp = $alice->decrypt($u2, $msg);
 
         sync(sub {
             ok($established->{$u2}, "Connection with $u2 established");
@@ -61,13 +58,13 @@ sub test_multithreading {
         });
 
         select undef, undef, undef, 1.2;
-        warn "\nbob buf: @$bob_buf\n";
 
         my $msg = shift @$bob_buf;
         ok($msg, "Injected OTR setup message");
-        my $resp = $bob->decrypt($msg);
-
-        warn "bob resp = $resp\n";
+        my $resp = $bob->decrypt($u1, $msg);
+        sync(sub {
+            $bob->encrypt($u1, "message two");
+        });
 
         sync(sub {
             ok($established->{$u1}, "Connection with $u1 established");
@@ -91,20 +88,22 @@ sub test_init {
 
     my $inject = sub {
         my ($account_name, $protocol, $dest_account, $message) = @_;
-        warn "inject called with: @_\n";
         push @$dest, $message;
     };
 
     my $unverified = sub {
-        warn "\n\nunverified\n\n";
         my ($otr, $other_user) = @_;
         print "Unverified conversation started with $other_user\n";
 
         $established->{$user} = 1;
     };
 
+    my $otr_system_message = sub {
+        warn "OTR system says: @_\n";
+    };
+
     $otr->set_callback('inject' => $inject);
-    #$otr->set_callback('otr_message' => \&otr_system_message);
+    $otr->set_callback('otr_message' => $otr_system_message);
     #$otr->set_callback('connect' => \&otr_connect);
     $otr->set_callback('unverified' => $unverified);
 

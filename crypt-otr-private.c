@@ -9,6 +9,7 @@
 static void
 crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
 {	
+  printf("crypt_otr_inject_message - injecting message [%s]\n", message);
 	dSP;
 	
 	ENTER;
@@ -22,7 +23,6 @@ crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, co
 	PUTBACK;
 
 	call_sv( crypt_state->inject_cb, G_DISCARD );
-	//call_pv( "main::perl_inject_message", G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -44,11 +44,6 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 	XPUSHs( sv_2mortal( newSVpv( protocol, 0 )));
 	XPUSHs( sv_2mortal( newSVpv( username, 0 )));
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
-	//XPUSHs(  newSVpv( accountname, 0 )); // The 0 causes perl to calculate the Strlen ...
-	//XPUSHs(  newSVpv( protocol, 0 ));
-	//XPUSHs(  newSVpv( username, 0 ));
-	//XPUSHs(  newSVpv( message, 0 ));
-
 	PUTBACK;
 
 	num_items_on_stack = call_sv( crypt_state->system_message_cb, G_DISCARD );
@@ -82,14 +77,17 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 
 	switch (level) {
 	case OTRL_NOTIFY_ERROR:
+      if ( crypt_state->error_cb )
 		call_sv( crypt_state->error_cb, G_DISCARD );
-		break;
+      break;
 	case OTRL_NOTIFY_WARNING:
-		call_sv( crypt_state->warning_cb, G_DISCARD );
-		break;
+      if ( crypt_state->warning_cb )
+        call_sv( crypt_state->warning_cb, G_DISCARD );
+      break;
 	case OTRL_NOTIFY_INFO:
+      if ( crypt_state->info_cb )
 		call_sv( crypt_state->info_cb, G_DISCARD );
-		break;
+      break;
 	}
 	
 	FREETMPS;
