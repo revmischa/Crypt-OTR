@@ -21,7 +21,6 @@ my $u2 = "bob";
 
 Crypt::OTR->init;
 
-my ($alice, $bob) = (init($u1, $alice_buf), init($u2, $bob_buf));
 
 ok(test_multithreading(), "multithreading");
 
@@ -34,6 +33,8 @@ sub sync (&) {
 
 sub test_multithreading {
     my $alice_thread = async {
+        my $alice = test_init($u1, $alice_buf);
+        
         sync(sub {
             $alice->establish($u2);
         });
@@ -53,6 +54,8 @@ sub test_multithreading {
     };
 
     my $bob_thread = async {
+        my $bob = test_init($u2, $bob_buf);
+        
         sync(sub {
             $bob->establish($u1);
         });
@@ -77,7 +80,7 @@ sub test_multithreading {
 }
 
 
-sub init {
+sub test_init {
     my ($user, $dest) = @_;
 
     my $otr = new Crypt::OTR(
