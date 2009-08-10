@@ -135,10 +135,10 @@ sub test_init {
     my $inject = sub {
         my ( $lol_dongs, $account_name, $protocol, $dest_account, $message) = @_;
 		print '"Sending" message from ' . "$account_name to $dest_account\n$message\n";
-        #push @$dest, $message;
+        push @$dest, $message;
 		
-		if( $dest_account eq $u1 ){ print "$dest_account Lol Dongs!!!\n"; push @$alice_debug_buf, $message; }
-		if( $dest_account eq $u2 ){ print "$dest_account Lol Dongs!!!\n"; push @$bob_debug_buf, $message; }
+		#if( $dest_account eq $u1 ){ print "$dest_account Lol Dongs!!!\n"; push @$alice_debug_buf, $message; }
+		#if( $dest_account eq $u2 ){ print "$dest_account Lol Dongs!!!\n"; push @$bob_debug_buf, $message; }
     };
 
     my $unverified = sub {
