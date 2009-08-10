@@ -57,7 +57,11 @@ sub test_multithreading {
 			#print "$u1 waiting for message\n";
 			sleep 1;
 
-			my $msg = shift @$alice_buf;
+			my $msg;
+			{
+				lock( @$alice_buf );
+				$msg = shift @$alice_buf;
+			}
 
 			if( $msg ){
 				#print "** $u1 received message from $u2: $msg\n";
@@ -73,6 +77,14 @@ sub test_multithreading {
         sync(sub {
             ok($established->{$u2}, "Connection with $u2 established");
         });
+		
+		{
+			my $enc_msg = $alice->encrypt($u2, "message two");
+			lock( @$bob_buf );
+			push @$bob_buf, $enc_msg;
+		}
+		
+		
     };
 
     my $bob_thread = async {
@@ -92,7 +104,11 @@ sub test_multithreading {
 				#print "$u2 waiting for message\n";
 				sleep 1;
 
-				my $msg = shift @$bob_buf;
+				my $msg;
+				{
+					lock( @$bob_buf );
+					$msg = shift @$bob_buf;
+				}
 
 				if( $msg ){
 					#print "** $u2 received message from $u1: $msg\n";
@@ -113,12 +129,30 @@ sub test_multithreading {
         }
         
         # encrypt message
-        {
-            my $enc_resp;
-            sync(sub {
-                $enc_resp = $bob->encrypt($u1, "message two");
-            });
-        }
+        #{
+#            my $enc_resp;
+#            sync(sub {
+#                $enc_resp = $bob->encrypt($u1, "message two");
+#            });
+        #}
+
+		{
+			my $rec_msg;
+			my $dec_msg;
+
+			until( $dec_msg )
+			{
+				{
+					lock( @$bob_buf );
+					$rec_msg = shift @$bob_buf;
+					$dec_msg = $bob->decrypt($u1, $rec_msg);
+				}
+				sleep 1;
+			}
+
+			print "\nDecrypting: $rec_msg\n\n";
+			print "\nDecrypted: $dec_msg\n\n";
+		}
 
     };
 
