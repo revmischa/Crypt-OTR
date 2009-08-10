@@ -94,34 +94,46 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 	char* username = who;
 	int err;
 	
-	printf( "crypt_otr_process_sending enrcypting %s\n%s\n%s\n%i\n", 
-		   message, accountname, username, userstate );
+	//printf( "crypt_otr_process_sending enrcypting %s\n%s\n%s\n%i\n", 
+	//   message, accountname, username, userstate );
 	
 	if( !who || !message )
 		return sv_2mortal( newSVpv( newmessage, 0 ));
-	
+
+	puts( "otr_message_sending" );	
+
 	err = otrl_message_sending( userstate, &otr_ops, NULL, 
 						   accountname, protocol, username, 
 						   message, NULL, &newmessage, NULL, NULL);
 
 	puts( "done sending" );
 	
-	if( err && newmessage == NULL ) {
+	if( err && (newmessage == NULL) ) {
 		/* Be *sure* not to send out plaintext */
+		puts( "Oops, message not encrypted" );
 		char* ourm = strdup( "" );
 		free( message ); // This may cause bugs, I don't know how perl allocates memory, though it's probably with strdup
 		message = ourm;
 	} else if ( newmessage ) {
+		puts( "Fragmenting message" );
 		/* Fragment the message if necessary, and send all but the last
 		 * fragment over the network.  The client will send the last
 		 * fragment for us. */
+
+		puts( "Finding context" );
 		ConnContext* context = otrl_context_find( userstate, username, accountname, 
 										  protocol, 0, NULL, NULL, NULL );
+		puts( "Found countext, freeing message" );
+		
 		free( message );
+		puts( "Freed message, fragmenting and sending" );
 		message = NULL;
 		err = otrl_message_fragment_and_send(&otr_ops, NULL, context,
 									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, message);
+
+		puts( "fragmented,  sent, freeing newmessage" );
 		otrl_message_free(newmessage);
+		puts( "newmessage freed" );
 	}
 	
 	printf( "Finished otrl_sending\n" );

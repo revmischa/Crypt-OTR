@@ -80,6 +80,7 @@ static void notify_cb(CryptOTRUserState opdata, OtrlNotifyLevel level,
 static int display_otr_message_cb(CryptOTRUserState opdata, const char *accountname,
 						    const char *protocol, const char *username, const char *msg)
 {
+	puts( "\"Displaying\" message" );
 	return crypt_otr_display_otr_message(opdata, accountname, protocol, username, msg);
 }
 

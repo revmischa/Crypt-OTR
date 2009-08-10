@@ -9,7 +9,8 @@
 static void
 crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
 {	
-  printf("crypt_otr_inject_message - injecting message [%s]\n", message);
+	//printf("crypt_otr_inject_message - injecting message [%s]\n", message);
+	puts("crypt_otr_inject_message");
 	dSP;
 	
 	//static char* return_stack[5];
@@ -46,6 +47,7 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 						 const char* protocol, const char* username, 
 						 const char* message )
 {
+	printf("crypt_otr_display_otr_message");
 	printf( "**Received message**\n" );
 
 	dSP;

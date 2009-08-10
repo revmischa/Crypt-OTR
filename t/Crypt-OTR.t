@@ -16,17 +16,20 @@ $established = share(%e);
 my $alice_buf = [];
 my $bob_buf = [];
 
+share( @$alice_buf );
+share( @$bob_buf );
+
 my $debug_buf = [];
-my $alice_debug_buf = [];
-my $bob_debug_buf = [];
 
 my $u1 = "alice";
 my $u2 = "bob";
 
-my %connected = (
+my %connected :shared = (
 	$u1 => 0,
 	$u2 => 0,
 	);
+
+#share( %connected );
 
 Crypt::OTR->init;
 
@@ -48,22 +51,22 @@ sub test_multithreading {
             $alice->establish($u2);
         });
 
-		while( $connected{ $u2 } == 0 ){
-			print "$u1 waiting for message\n";
+		my $con = 0;
+
+		while( $con == 0 ){
+			#print "$u1 waiting for message\n";
 			sleep 1;
 
 			my $msg = shift @$alice_buf;
-			my $tmp_msg = shift @$alice_debug_buf;
-
-			if( $tmp_msg ){
-				print "** DEBUG ** $u1 received message from $u2: $msg\n";
-				my $resp = $alice->decrypt($u2, $msg);
-			}
 
 			if( $msg ){
-				print "** $u1 received message from $u2: $msg\n";
+				#print "** $u1 received message from $u2: $msg\n";
 				#ok($msg, "Injected OTR setup message");
 				my $resp = $alice->decrypt($u2, $msg);
+			}
+			{
+				lock( %connected );
+				$con = $connected{ $u2 }
 			}
 		}
 
@@ -83,23 +86,25 @@ sub test_multithreading {
 
             select undef, undef, undef, 1.2;
 
-			while( $connected{ $u1 } == 0 ){
-				print "$u2 waiting for message\n";
+			my $con = 0;
+
+			while( $con == 0 ){
+				#print "$u2 waiting for message\n";
 				sleep 1;
 
 				my $msg = shift @$bob_buf;
-				my $tmp_msg = shift @$bob_debug_buf;
-
-				if( $tmp_msg ){
-					print "** DEBUG ** $u1 received message from $u2: $msg\n";
-					my $resp = $bob->decrypt($u1, $msg);
-				}
 
 				if( $msg ){
-					print "** $u2 received message from $u1: $msg\n";
+					#print "** $u2 received message from $u1: $msg\n";
 					#ok($msg, "Injected OTR setup message");
 					my $resp = $bob->decrypt($u1, $msg);
 				}
+
+				{
+					lock( %connected );
+					$con = $connected{ $u1 };
+				}
+
 			}
 
             sync(sub {
@@ -133,12 +138,11 @@ sub test_init {
                              );
 
     my $inject = sub {
-        my ( $lol_dongs, $account_name, $protocol, $dest_account, $message) = @_;
-		print '"Sending" message from ' . "$account_name to $dest_account\n$message\n";
+        my ( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
+		#print '"Sending" message from ' . "$account_name to $dest_account\n$message\n";
+
+		lock( @$dest );
         push @$dest, $message;
-		
-		#if( $dest_account eq $u1 ){ print "$dest_account Lol Dongs!!!\n"; push @$alice_debug_buf, $message; }
-		#if( $dest_account eq $u2 ){ print "$dest_account Lol Dongs!!!\n"; push @$bob_debug_buf, $message; }
     };
 
     my $unverified = sub {
@@ -155,16 +159,20 @@ sub test_init {
 	# Note: I don't know if this user name is the person you have started a secure connection WITH
 	# of if it's your name... I think it's their name.
 	my $connected_cb = sub {
-		my( $username ) = @_;
+		my( $ptr, $username ) = @_;
 
-		print "Secure connection started with $username\n";
+		print "Connection started with $username\n";
+		lock( %connected );
 		$connected{ $username } = 1;
+        $established->{$username} = 1;
 	};
+
+	
 
     $otr->set_callback('inject' => $inject);
     $otr->set_callback('otr_message' => $otr_system_message);
-    $otr->set_callback('connect' => $connected_cb);
-    $otr->set_callback('unverified' => $unverified);
+    #$otr->set_callback('connect' => $connected_cb);
+    $otr->set_callback('unverified' => $connected_cb);
 
     return $otr;
 }
