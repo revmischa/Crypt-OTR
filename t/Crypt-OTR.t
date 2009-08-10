@@ -16,6 +16,10 @@ $established = share(%e);
 my $alice_buf = [];
 my $bob_buf = [];
 
+my $debug_buf = [];
+my $alice_debug_buf = [];
+my $bob_debug_buf = [];
+
 my $u1 = "alice";
 my $u2 = "bob";
 
@@ -49,10 +53,15 @@ sub test_multithreading {
 			sleep 1;
 
 			my $msg = shift @$alice_buf;
-			print "Shift: $msg\n";
+			my $tmp_msg = shift @$alice_debug_buf;
+
+			if( $tmp_msg ){
+				print "** DEBUG ** $u1 received message from $u2: $msg\n";
+				my $resp = $alice->decrypt($u2, $msg);
+			}
 
 			if( $msg ){
-				print "$u1 received message from $u2: $msg\n";
+				print "** $u1 received message from $u2: $msg\n";
 				#ok($msg, "Injected OTR setup message");
 				my $resp = $alice->decrypt($u2, $msg);
 			}
@@ -79,8 +88,15 @@ sub test_multithreading {
 				sleep 1;
 
 				my $msg = shift @$bob_buf;
+				my $tmp_msg = shift @$bob_debug_buf;
+
+				if( $tmp_msg ){
+					print "** DEBUG ** $u1 received message from $u2: $msg\n";
+					my $resp = $bob->decrypt($u1, $msg);
+				}
+
 				if( $msg ){
-					print "$u2 received message from $u1: $msg\n";
+					print "** $u2 received message from $u1: $msg\n";
 					#ok($msg, "Injected OTR setup message");
 					my $resp = $bob->decrypt($u1, $msg);
 				}
@@ -119,7 +135,10 @@ sub test_init {
     my $inject = sub {
         my ( $lol_dongs, $account_name, $protocol, $dest_account, $message) = @_;
 		print '"Sending" message from ' . "$account_name to $dest_account\n$message\n";
-        push @$dest, $message;
+        #push @$dest, $message;
+		
+		if( $dest_account eq $u1 ){ print "$dest_account Lol Dongs!!!\n"; push @$alice_debug_buf, $message; }
+		if( $dest_account eq $u2 ){ print "$dest_account Lol Dongs!!!\n"; push @$bob_debug_buf, $message; }
     };
 
     my $unverified = sub {
