@@ -102,7 +102,7 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 
 	puts( "otr_message_sending" );	
 
-	err = otrl_message_sending( userstate, &otr_ops, NULL, 
+	err = otrl_message_sending( userstate, &otr_ops, crypt_state, 
 						   accountname, protocol, username, 
 						   message, NULL, &newmessage, NULL, NULL);
 
@@ -128,8 +128,8 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 		free( message );
 		puts( "Freed message, fragmenting and sending" );
 		message = NULL;
-		err = otrl_message_fragment_and_send(&otr_ops, NULL, context,
-									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, message);
+		err = otrl_message_fragment_and_send(&otr_ops, crypt_state, context,
+									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, &message);
 
 		puts( "fragmented,  sent, freeing newmessage" );
 		otrl_message_free(newmessage);
