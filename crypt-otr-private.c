@@ -2,12 +2,11 @@
 
 
 ////////////////////////////////////////////////
-// CRYPT_OTR FUNCTIONS
+// PRIVATE NON-CALLBACK, NON-PERL FUNCTIONS
 ///////////////////////////////////////////////
 
 /* Quetion: should these return values use
  *	sv_2mortal?
- *
  */
 
 static void
@@ -94,6 +93,30 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 	FREETMPS;
 	LEAVE;
 }
+
+
+void crypt_otr_notify_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
+{
+	dSP;
+	
+	ENTER;
+	SAVETMPS;
+
+	PUSHMARK(SP);
+	XPUSHs( sv_2mortal( newSVpv( accountname, 0 )));
+	XPUSHs( sv_2mortal( newSVpv( protocol, 0 )));
+	XPUSHs( sv_2mortal( newSVpv( username, 0 )));
+	XPUSHs( sv_2mortal( newSVpv( fingerprint, 20 )));
+	PUTBACK;
+
+	call_sv( crypt_state->new_fpr_cb, G_DISCARD );
+	
+	FREETMPS;
+	LEAVE;
+}
+
+
+
 
 /* This function notifies of both authentication questions
  * and requests.
@@ -287,8 +310,9 @@ ConnContext* crypt_otr_get_context( CryptOTRUserState crypt_state, char* account
 
 void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
 {
-	printf( "New fingerprint: %s\n", fingerprint );
-	//otrl_privkey_write_fingerprints( crypt_state->otrl_state, crypt_state->frpfile );
+	if( crypt_state->new_fpr_cb )
+		crypt_otr_notify_new_fingerprint( crypt_state, accountname, protocol,
+								    username, fingerprint );
 } 
 
 

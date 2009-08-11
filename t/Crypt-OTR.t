@@ -402,6 +402,12 @@ sub test_init {
 		}
 	};
 	
+	my $new_fingerprint_cb = sub {
+		my( $ptr, $accountname, $protocol, $username, $fingerprint) = @_;
+		
+		print "New fingerprint for $username = $fingerprint\n";
+	};
+
 	my $still_connected_cb = sub {
 		my( $ptr, $username ) = @_;
 		
@@ -433,6 +439,8 @@ sub test_init {
 	$otr->set_callback('warning' => $warning_cb);
 	$otr->set_callback('info' => $info_cb);
 	$otr->set_callback('smp_request' => $smp_request_cb);
+	
+	$otr->set_callback('new_fingerprint' => $new_fingerprint_cb);
 
     return $otr;
 }

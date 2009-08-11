@@ -5,34 +5,22 @@
 ////////////////////////////////////////
 
 
-/* crypt_otr_init
- * Call OTRL_INIT
- * Create a private key if there is not one already
- * Store values of accountname (your name), the protocol
- */
-
-//int crypt_otr_init( SV* sv_accountname, SV* sv_protocolname, SV* sv_max_message_size )
 int crypt_otr_init(  )
 {		
 	OTRL_INIT;
-	//otrl_sm_init(); // Q4Cypherpnks: Why is this not in OTRL_INIT?
+	// This works without this line, and the pidgin OTR plugin doesn't use it
+	//otrl_sm_init();
 }
 
 CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char* protocol )
 {
-	//printf( "_Creating user\n" );
-
 	char* root = in_root;
 	char* temp_keyfile;
 	char* temp_fingerprintfile;
-	
 	CryptOTRUserState crypt_state = crypt_otr_create_new_userstate();
 
 	crypt_state->root = strdup( in_root );
-	
 	crypt_state->otrl_state = otrl_userstate_create();	
-	printf( "userstate ptr = %i\n", crypt_state->otrl_state );
-
 	
 	temp_keyfile = malloc( (strlen(in_root) + 
 					    strlen(PRIVKEY_FILE_NAME) +
@@ -51,8 +39,6 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 				
 	crypt_state->keyfile = temp_keyfile;
 	crypt_state->fprfile = temp_fingerprintfile;
-
-	//printf( "Set keyfile for %s to  %s\n", account_name, crypt_state->keyfile );
 	
 	return crypt_state;
 }
@@ -60,9 +46,6 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, 
 					 char* in_username )
 {		
-	//printf( "_crypt_otr_establish\n" );
-	//printf( "Got State = %i\n", in_state );
-		
 	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
 		printf( "Could not read OTR key from %s\n", in_state->keyfile);
 		crypt_otr_create_privkey( in_state, in_account, in_proto );
@@ -70,8 +53,6 @@ void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in
 	else {
 		printf( "Loaded private key file from %s\n", in_state->keyfile );
 	}
-	
-	//dumpState( in_state );
 
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 1 );
 }
@@ -80,7 +61,6 @@ void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in
 void crypt_otr_disconnect( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, 
 					  char* in_username )
 {
-	//printf( "_crypt_otr_disconnect\n" );
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 0 );
 }
 
@@ -103,8 +83,6 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 						   accountname, protocol, username, 
 						   message, NULL, &newmessage, NULL, NULL);
 
-	//puts( "done sending" );
-	
 	if( err && (newmessage == NULL) ) {
 		/* Be *sure* not to send out plaintext */
 		//puts( "Oops, message not encrypted" );
@@ -112,35 +90,22 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 		free( message ); // This may cause bugs, I don't know how perl allocates memory, though it's probably with strdup
 		message = ourm;
 	} else if ( newmessage ) {
-		//puts( "Fragmenting message" );
 		/* Fragment the message if necessary, and send all but the last
 		 * fragment over the network.  The client will send the last
 		 * fragment for us. */
-
-		//puts( "Finding context" );
 		ConnContext* context = otrl_context_find( userstate, username, accountname, 
 										  protocol, 0, NULL, NULL, NULL );
-		//puts( "Found countext, freeing message" );
 		
 		free( message );
-		//puts( "Freed message, fragmenting and sending" );
 		message = NULL;
 		err = otrl_message_fragment_and_send(&otr_ops, crypt_state, context,
 									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, &message);
 
-		//puts( "fragmented,  sent, freeing newmessage" );
 		otrl_message_free(newmessage);
-		//puts( "newmessage freed" );
 	}
-	
-	//printf( "Finished otrl_sending\n" );
-	//printf( "Returning message:\n%s\n", message );
-
-	//SV* temp_return = sv_2mortal( newSVpv( message, 0 ));		 
 		
 	return newSVpv( message, 0 );
 }
-
 
 /*
  * returns whether a otr_message was received
@@ -267,11 +232,6 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 		free(message);
 		message = NULL;
 	}
-			
-	//printf( "crypt_otr_process_receiving end\n" );
-	//printf( "who: %s\nmsg:\n%s\n", who, message );	
-			
-	//SV* temp_return = sv_2mortal( newSVpv( message, 0 ));
 
 	return newSVpv( message, 0 );
 }
@@ -323,17 +283,15 @@ void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, c
 }
 
 
-
-
+// Todo: make this actually clean things up.
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
-
-  if (crypt_state->inject_cb)
-    SvREFCNT_dec(crypt_state->inject_cb);
+	/*
+	if (crypt_state->inject_cb)
+		SvREFCNT_dec(crypt_state->inject_cb);
+	*/
 
 	free( crypt_state->keyfile );
 	free( crypt_state->fprfile );
 	free( crypt_state );
-
 }
-

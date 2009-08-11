@@ -1,4 +1,5 @@
 
+// There is a struct name conflict with perl.h
 #define context otr_context
 #include <libotr/context.h>
 #undef context
@@ -11,11 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_ROOT "~/.crypt-otr/"
 #define PRIVKEY_FILE_NAME "otr.private_key"
 #define STORE_FILE_NAME "otr.fingerprints"
-
-
 
 typedef struct crypt_otr_user_state* CryptOTRUserState;
 
@@ -45,7 +43,6 @@ typedef enum {
 	SMP_REQUEST_SECRET,
 	SMP_REQUEST_SECRET_Q
 } SMPNotifyType;
-
 
 void crypt_otr_store_callback( CV* struct_callback, CV* perl_callback );
 
@@ -90,9 +87,6 @@ static void 		gone_insecure_cb(CryptOTRUserState opdata, ConnContext *context);
 static void 		still_secure_cb(CryptOTRUserState opdata, ConnContext *context, int is_reply);
 static void 		log_message_cb(void *opdata, const char *message);
 static int 		max_message_size_cb(CryptOTRUserState opdata, ConnContext *context);
-static const char* 	account_name_cb( CryptOTRUserState opdata, const char *account, const char *protocol );
-static void 		account_name_free_cb(CryptOTRUserState opdata, const char *account_name);
-
 
 typedef enum {
     TRUST_NOT_PRIVATE,
@@ -104,9 +98,6 @@ typedef enum {
 int crypt_otr_context_to_trust(ConnContext *context);
 
 CryptOTRUserState get_state( SV* sv_state );
-
-
-
 
 #include "crypt-otr-utils.c"
 #include "crypt-otr-members.c"
