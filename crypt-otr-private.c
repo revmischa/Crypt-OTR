@@ -233,9 +233,6 @@ void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char
 	
 	OtrlUserState userstate = crypt_state->otrl_state;
 
-	//printf( "crypt_otr_startstop userstate: %i\ncontext: %u\nusername: %s\n", userstate, ctx, username );
-	//perror( "crypt_otr_startstop userstate: " ); perror( userstate );	
-
 	if( !userstate || !ctx )
 		return;
 	
@@ -245,10 +242,12 @@ void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char
 
 	if( start ) {
 		OtrlPolicy policy = policy_cb( NULL, ctx );
-		// check policy here to make sure it iss set to encrypted
+
+		// Todo: check policy here to make sure it is set to encrypted
+		//       now, policy doesn't mean anything.
 			
 		msg = otrl_proto_default_query_msg( ctx->accountname, policy );
-		//printf( "Injecting OTR message: %s\n", msg );
+
 		inject_message_cb( crypt_state, ctx->accountname, ctx->protocol, ctx->username, msg );
 	
 		free( msg );
