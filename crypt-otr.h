@@ -36,7 +36,15 @@ struct crypt_otr_user_state {
 	CV* warning_cb;
 	CV* info_cb;
 	CV* new_fpr_cb;
+	CV* smp_request_cb;
 };
+
+typedef enum {
+	SMP_PROGRESS,
+	SMP_ESTABLISHED,
+	SMP_REQUEST_SECRET,
+	SMP_REQUEST_SECRET_Q
+} SMPNotifyType;
 
 
 void crypt_otr_store_callback( CV* struct_callback, CV* perl_callback );

@@ -12,7 +12,7 @@ static OtrlPolicy policy_cb(void *opdata, ConnContext *context)
     	OtrlPolicy policy = OTRL_POLICY_DEFAULT;
     
     if (!context) return policy;
-c
+
     return crypt_otr_get_policy(account, context->username);
 	*/
 	
@@ -55,7 +55,7 @@ static int is_logged_in_cb(void *opdata, const char *accountname,
 static void inject_message_cb( CryptOTRUserState opdata, const char *accountname,
 	const char *protocol, const char *recipient, const char *message)
 {    
-	puts( "Injecting message" );
+	//puts( "Injecting message" );
 	crypt_otr_inject_message(opdata, accountname, protocol, recipient, message);
 }
 

@@ -5,27 +5,16 @@
 // CRYPT_OTR FUNCTIONS
 ///////////////////////////////////////////////
 
+/* Quetion: should these return values use
+ *	sv_2mortal?
+ *
+ */
 
 static void
 crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
 {	
-	//printf("crypt_otr_inject_message - injecting message [%s]\n", message);
-	puts("crypt_otr_inject_message");
 	dSP;
-	
-	//static char* return_stack[5];
-
-	//return_stack[0] = account;
-	//return_stack[1] = protocol;
-	//return_stack[2] = recipient;
-	//return_stack[3] = message;
-	//return_stack[4] = NULL; 	
-	
-	//printf( "About to call perl_call_argv\n" );
-	//perl_call_argv( crypt_state->inject_cb, G_DISCARD, return_stack ); 
-	//printf( "Called perl_call_argv\n" );
-
-	
+		
 	ENTER;
 	SAVETMPS;
 
@@ -47,9 +36,6 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 						 const char* protocol, const char* username, 
 						 const char* message )
 {
-	printf("crypt_otr_display_otr_message");
-	printf( "**Received message**\n" );
-
 	dSP;
 	int num_items_on_stack;
 	
@@ -57,7 +43,7 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 	SAVETMPS;
 
 	PUSHMARK(SP);
-	XPUSHs( sv_2mortal( newSVpv( accountname, 0 ))); // The 0 causes perl to calculate the Strlen ...
+	XPUSHs( sv_2mortal( newSVpv( accountname, 0 )));
 	XPUSHs( sv_2mortal( newSVpv( protocol, 0 )));
 	XPUSHs( sv_2mortal( newSVpv( username, 0 )));
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
@@ -76,8 +62,6 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 				   const char* accountname, const char* protocol, const char* username, 
 				   const char* title, const char* primary, const char* secondary )
 {
-	puts( "crypt_otr_notify" );
-
 	dSP;
 	
 	ENTER;
@@ -111,17 +95,36 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 	LEAVE;
 }
 
+/* This function notifies of both authentication questions
+ * and requests.
+ */
+void crypt_otr_smp_notify( CryptOTRUserState crypt_state, SMPNotifyType notify, 
+					  char* protocol, char* username,
+					  char* question )
+{
+	dSP;
+	
+	ENTER;
+	SAVETMPS;
+
+	PUSHMARK(SP);
+	XPUSHs( sv_2mortal( newSVpv( protocol, 0 )));
+	XPUSHs( sv_2mortal( newSVpv( username, 0 )));
+	XPUSHs( sv_2mortal( newSVpv( question, 0 )));
+	PUTBACK;
+
+	call_sv( crypt_state->smp_request_cb, G_DISCARD );
+	
+	FREETMPS;
+	LEAVE;
+}
 
 void crypt_otr_handle_connected(CryptOTRUserState crypt_state, ConnContext* context)
 {	
 	char* username = context->username;
 	TrustLevel level;
 
-	//printf( "***************\nCONNECTED\n***************\n");
-
 	level = crypt_otr_context_to_trust(context);
-
-	//printf( "Got level\n" );
 
 	switch(level) {
 	case TRUST_PRIVATE:
@@ -135,7 +138,7 @@ void crypt_otr_handle_connected(CryptOTRUserState crypt_state, ConnContext* cont
 	default:
 		/* This last case should never happen, since we know
 		 * we're in ENCRYPTED. */
-		printf( "ERROR -- Unencrypted conversation started\n" );
+		perror( "ERROR -- Unencrypted conversation started\n" );
 		break;
 	}
 }
@@ -156,7 +159,6 @@ void crypt_otr_callback_one_string( CV* callback_sub, char* username )
 	
 	FREETMPS;
 	LEAVE;
-
 }
 
 /* Send the username, basically saying that a trusted conversation has been started with username */
@@ -182,31 +184,8 @@ void crypt_otr_handle_stillconnected( CryptOTRUserState crypt_state, char* usern
 {
 	crypt_otr_callback_one_string( crypt_state->stillconnected_cb, username );
 }
-	
 
-
-/* Abort the SMP protocol.  Used when malformed or unexpected messages
- * are received. */
-void crypt_otr_abort_smp( CryptOTRUserState crypt_state, ConnContext* context )
-{
-	otrl_message_abort_smp( crypt_state->otrl_state, &otr_ops, NULL, context);
-}
-
-void crypt_otr_completed_smp( ConnContext* context )
-{
-
-}
-
-void crypt_otr_ask_socialist_millionaires_q( ConnContext* context, char* question )
-{
-
-}
-
-void crypt_otr_ask_socialist_millionaires( ConnContext* context )
-{
-
-}
-
+/* Find the trust level of the conversation, given its context */
 int crypt_otr_context_to_trust(ConnContext *context)
 {
     TrustLevel level = TRUST_NOT_PRIVATE;
@@ -229,12 +208,8 @@ int crypt_otr_context_to_trust(ConnContext *context)
 void crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char* accountname, const char* protocol  )						
 {
     	int key_error;
-			
-	OtrlUserState userstate = crypt_state->otrl_state; // extract the pointer
-	printf( "Userstate extracted %i\n", userstate );
-	
+	OtrlUserState userstate = crypt_state->otrl_state;
 	char* keyfile = crypt_state->keyfile;	
-	printf( "Keyfile extracted: %s\n", keyfile);
 
 	printf( "Generating new OTR key for %s.\nThis may take a while... (like several minutes srsly)\n", accountname);
 
@@ -250,17 +225,15 @@ void crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char* accoun
 	}   
 }
 
-
  
 void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username, int start )
 {	
-	printf( "_crypt_otr_startstop\n" );
 	char* msg = NULL;
 	ConnContext* ctx = crypt_otr_get_context( crypt_state, accountname, protocol, username );
 	
 	OtrlUserState userstate = crypt_state->otrl_state;
 
-	printf( "crypt_otr_startstop userstate: %i\ncontext: %u\nusername: %s\n", userstate, ctx, username );
+	//printf( "crypt_otr_startstop userstate: %i\ncontext: %u\nusername: %s\n", userstate, ctx, username );
 	//perror( "crypt_otr_startstop userstate: " ); perror( userstate );	
 
 	if( !userstate || !ctx )
@@ -274,10 +247,8 @@ void crypt_otr_startstop( CryptOTRUserState crypt_state, char* accountname, char
 		OtrlPolicy policy = policy_cb( NULL, ctx );
 		// check policy here to make sure it iss set to encrypted
 			
-
-			
 		msg = otrl_proto_default_query_msg( ctx->accountname, policy );
-		printf( "Injecting OTR message: %s\n", msg );
+		//printf( "Injecting OTR message: %s\n", msg );
 		inject_message_cb( crypt_state, ctx->accountname, ctx->protocol, ctx->username, msg );
 	
 		free( msg );
@@ -297,17 +268,19 @@ static void crypt_otr_message_disconnect( CryptOTRUserState crypt_state,  ConnCo
 }
 
 
-/* Looks up the context for the target in a global hash (stored on the Perl side */
+/* Looks up the context
+ * Accountname = you
+ * Username = them  */
 ConnContext* crypt_otr_get_context( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username )
 {
 	int null = 0;
 	ConnContext* ctx;
-			
 	OtrlUserState userstate = crypt_state->otrl_state;
 	
-	printf( "crypt_otr_get_context accountname: %s\nuserstate: %i\nprotocol: %s\n", accountname, userstate, protocol );
-	
 	/* Finds the context.  The fifth parameter is true, so it creates a context if one didn't exist already. */
+	/* username = them
+	 * accountname = your accountname
+	 */
 	ctx = otrl_context_find( userstate, username, accountname, protocol, 1, &null, NULL, NULL );
 
 	return ctx;
@@ -315,10 +288,53 @@ ConnContext* crypt_otr_get_context( CryptOTRUserState crypt_state, char* account
 
 void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
 {
-	printf( "New fingerprint: %s", fingerprint );
+	printf( "New fingerprint: %s\n", fingerprint );
 	//otrl_privkey_write_fingerprints( crypt_state->otrl_state, crypt_state->frpfile );
 } 
 
+
+void crypt_otr_notify_socialist_millionaires_statis( CryptOTRUserState crypt_state, char* accountname, char* protocol,
+										   ConnContext* context,
+										   int progress )
+{
+	if( progress > 2 ){
+		TrustLevel level = crypt_otr_context_to_trust(context);
+
+		if( level == TRUST_PRIVATE ){
+			crypt_otr_handle_trusted_connection( crypt_state, context->username );
+		}
+	}
+	
+	char* prog = malloc( strlen("SMP progress level = ") + 2 );
+	sprintf( prog, "SMP progress level = %i", progress);	
+
+	crypt_otr_notify( crypt_state, OTRL_NOTIFY_INFO,
+				   accountname, protocol, context->username,
+				   "Socialist Millionaires Protocol", "Status Update", prog);
+
+	free( prog );
+}
+
+
+void crypt_otr_ask_socialist_millionaires( CryptOTRUserState crypt_state, char* accountname, char* protocol,
+								   ConnContext* context, char* question, int responder)
+{
+	if( context == NULL ) return;
+	
+	if( responder && question ){
+		crypt_otr_smp_notify( crypt_state, SMP_REQUEST_SECRET_Q,
+						  protocol, context->username, question);
+	} else {
+		crypt_otr_smp_notify( crypt_state, SMP_REQUEST_SECRET,
+						  protocol, context->username, NULL );
+	}
+} 
+
+
+void crypt_otr_abort_smp_context( CryptOTRUserState crypt_state, ConnContext* context )
+{
+	otrl_message_abort_smp(crypt_state->otrl_state, &otr_ops, crypt_state, context);
+}
 
 
 CryptOTRUserState crypt_otr_create_new_userstate(){

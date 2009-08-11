@@ -212,8 +212,16 @@ sub set_callback {
     my $callback_map = {
         'inject' => \&crypt_otr_set_inject_cb,
         'otr_message' => \&crypt_otr_set_system_message_cb,
-        'connect' => \&crypt_otr_set_connected_cb,
+        'secured' => \&crypt_otr_set_connected_cb,
         'unverified' => \&crypt_otr_set_unverified_cb,
+		'disconnect' => \&crypt_otr_set_disconnected_cb,
+		'system_message' => \&crypt_otr_set_system_message_cb,
+		'still_connected' => \&crypt_otr_set_stillconnected_cb,
+		'error' => \&crypt_otr_set_error_cb,
+		'warning' => \&crypt_otr_set_warning_cb,
+		'info' => \&crypt_otr_set_info_cb,
+		'new_fingerprint' => \&crypt_otr_set_new_fpr_cb,
+		'smp_request' => \&crypt_otr_set_smp_request_cb,
     };
 
     my $cb_method = $callback_map->{$action}
@@ -264,6 +272,49 @@ sub decrypt {
     return crypt_otr_process_receiving($self->_args, $user_name, $ciphertext);
 }
 
+=item start_smp($user_name, $secret, $question)
+
+Start the Socialist Millionaires' Protocol over the current connection, using the given initial secret, and optionally a question to pass to the buddy (not supported).
+
+=cut
+
+sub start_smp {
+	my($self, $user_name, $secret, $question) = @_;
+	
+	return undef unless $secret;
+	
+	if( $question ){
+		crypt_otr_start_smp_q($self->_args, $user_name, $secret, $question);
+	} else {
+		crypt_otr_start_smp($self->_args, $user_name, $secret );
+	}
+
+}
+
+=item continue_smp($user_name, $secret)
+
+Continue the Socialist Millionaires' Protocol over the current connection, using the given initial secret
+
+=cut
+
+sub continue_smp {
+	my($self, $user_name, $secret) = @_;
+
+	return undef unless $secret;
+	crypt_otr_continue_smp($self->_args, $user_name, $secret);
+}
+
+=item abort_smp($user_name)
+
+Abort the SMP protocol.  Used when malformed or unexpected messages are received.
+
+=cut
+
+sub abort_smp {
+	my($self, $user_name) = @_;
+	
+	crypt_otr_abort_smp($self->_args, $user_name);
+}
 
 =item finish($user_name)
 

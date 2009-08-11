@@ -15,11 +15,12 @@
 int crypt_otr_init(  )
 {		
 	OTRL_INIT;
+	//otrl_sm_init(); // Q4Cypherpnks: Why is this not in OTRL_INIT?
 }
 
 CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char* protocol )
 {
-	printf( "_Creating user\n" );
+	//printf( "_Creating user\n" );
 
 	char* root = in_root;
 	char* temp_keyfile;
@@ -51,16 +52,16 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 	crypt_state->keyfile = temp_keyfile;
 	crypt_state->fprfile = temp_fingerprintfile;
 
-	printf( "Set keyfile for %s to  %s\n", account_name, crypt_state->keyfile );
+	//printf( "Set keyfile for %s to  %s\n", account_name, crypt_state->keyfile );
 	
 	return crypt_state;
 }
 
-
-void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
+void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, 
+					 char* in_username )
 {		
-	printf( "_crypt_otr_establish\n" );
-	printf( "Got State = %i\n", in_state );
+	//printf( "_crypt_otr_establish\n" );
+	//printf( "Got State = %i\n", in_state );
 		
 	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
 		printf( "Could not read OTR key from %s\n", in_state->keyfile);
@@ -70,22 +71,23 @@ void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in
 		printf( "Loaded private key file from %s\n", in_state->keyfile );
 	}
 	
-	dumpState( in_state );
+	//dumpState( in_state );
 
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 1 );
 }
 
 
-void crypt_otr_disconnect( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, char* in_username )
+void crypt_otr_disconnect( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, 
+					  char* in_username )
 {
-	printf( "_crypt_otr_disconnect\n" );
+	//printf( "_crypt_otr_disconnect\n" );
 	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 0 );
 }
 
 
-SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, char* in_proto, int in_max, char* who, char* sv_message )
+SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, char* in_proto, int in_max, 
+						 char* who, char* sv_message )
 {
-	printf( "_crypt_otr_process_sending\n" );
 	char* newmessage = NULL;
 	char* message = strdup( sv_message );
 	OtrlUserState userstate = crypt_state->otrl_state;
@@ -93,55 +95,50 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 	const char* protocol = in_proto;
 	char* username = who;
 	int err;
-	
-	//printf( "crypt_otr_process_sending enrcypting %s\n%s\n%s\n%i\n", 
-	//   message, accountname, username, userstate );
-	
+		
 	if( !who || !message )
-		return sv_2mortal( newSVpv( newmessage, 0 ));
-
-	puts( "otr_message_sending" );	
+		return newSVpv( newmessage, 0);
 
 	err = otrl_message_sending( userstate, &otr_ops, crypt_state, 
 						   accountname, protocol, username, 
 						   message, NULL, &newmessage, NULL, NULL);
 
-	puts( "done sending" );
+	//puts( "done sending" );
 	
 	if( err && (newmessage == NULL) ) {
 		/* Be *sure* not to send out plaintext */
-		puts( "Oops, message not encrypted" );
+		//puts( "Oops, message not encrypted" );
 		char* ourm = strdup( "" );
 		free( message ); // This may cause bugs, I don't know how perl allocates memory, though it's probably with strdup
 		message = ourm;
 	} else if ( newmessage ) {
-		puts( "Fragmenting message" );
+		//puts( "Fragmenting message" );
 		/* Fragment the message if necessary, and send all but the last
 		 * fragment over the network.  The client will send the last
 		 * fragment for us. */
 
-		puts( "Finding context" );
+		//puts( "Finding context" );
 		ConnContext* context = otrl_context_find( userstate, username, accountname, 
 										  protocol, 0, NULL, NULL, NULL );
-		puts( "Found countext, freeing message" );
+		//puts( "Found countext, freeing message" );
 		
 		free( message );
-		puts( "Freed message, fragmenting and sending" );
+		//puts( "Freed message, fragmenting and sending" );
 		message = NULL;
 		err = otrl_message_fragment_and_send(&otr_ops, crypt_state, context,
 									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, &message);
 
-		puts( "fragmented,  sent, freeing newmessage" );
+		//puts( "fragmented,  sent, freeing newmessage" );
 		otrl_message_free(newmessage);
-		puts( "newmessage freed" );
+		//puts( "newmessage freed" );
 	}
 	
-	printf( "Finished otrl_sending\n" );
-	printf( "Returning message:\n%s\n", message );
+	//printf( "Finished otrl_sending\n" );
+	//printf( "Returning message:\n%s\n", message );
 
-	SV* temp_return = sv_2mortal( newSVpv( message, 0 ));		 
+	//SV* temp_return = sv_2mortal( newSVpv( message, 0 ));		 
 		
-	return temp_return;
+	return newSVpv( message, 0 );
 }
 
 
@@ -149,11 +146,10 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
  * returns whether a otr_message was received
  * sets *message to NULL, when it was an internal otr message
  */
-SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, char* who, char* sv_message )
+SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, 
+						    char* who, char* sv_message )
 {
-	printf( "_crypt_otr_process_receiving\n" );
 	char* message = strdup( sv_message  );
-	//char* message = message_ptr;
 	char* message_out = NULL;
     	char* newmessage = NULL;
 	OtrlTLV* tlvs = NULL;
@@ -167,7 +163,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	NextExpectedSMP nextMsg;
 
 	if( !who || !message )
-		return sv_2mortal( newSVpv( newmessage, 0 ));
+		return newSVpv( newmessage, 0);
 
 	res = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
 							accountname, protocol, username, message,
@@ -179,70 +175,78 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 			strcpy( ourm, newmessage );
 		}
 		otrl_message_free( newmessage );
-		free( message ); // this may cause problems, if perl doesn't use malloc, or tries cleaning up the pointer itself
+		free( message );
 		message = ourm;
 	}
 
 	tlv = otrl_tlv_find( tlvs, OTRL_TLV_DISCONNECTED );
 	if( tlv ) {
 		/* Notify the user that the other side disconnected */
-		crypt_otr_handle_disconnection( crypt_state, username );
+		crypt_otr_handle_disconnection(crypt_state, username );
 	}
 
 	/* Keep track of our current progress in the Socialist Millionaires'
 	 * Protocol. */
-	context = otrl_context_find( userstate, username, accountname, protocol, 0, NULL, NULL, NULL );
+	context = otrl_context_find( userstate, username, 
+						    accountname, protocol, 0, NULL, NULL, NULL );
+
 	if( context ) {
 		nextMsg = context->smstate->nextExpected;
 
 		if( context->smstate->sm_prog_state == OTRL_SMP_PROG_CHEATED ) {
-			crypt_otr_abort_smp( crypt_state, context );
+			crypt_otr_abort_smp_context( crypt_state, context );
 			context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 			context->smstate->sm_prog_state = OTRL_SMP_PROG_OK;
 		} else {
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1Q);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT1)
-					crypt_otr_abort_smp(crypt_state, context);
+					crypt_otr_abort_smp_context( crypt_state, context);
 				else {
 					char *question = (char *)tlv->data;
 					char *eoq = memchr(question, '\0', tlv->len);
 					if (eoq) {
-						crypt_otr_ask_socialist_millionaires_q(context, question);
+						crypt_otr_ask_socialist_millionaires(crypt_state, in_accountname, in_protocol,
+													  context, question, 1);
 					}
 				}
 			}
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT1)
-					crypt_otr_abort_smp(crypt_state, context);
+					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
-					crypt_otr_ask_socialist_millionaires(context);
+					crypt_otr_ask_socialist_millionaires(crypt_state, in_accountname, in_protocol,
+												  context, NULL, 1 );
 				}
 			}
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT2)
-					crypt_otr_abort_smp(crypt_state, context);
+					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
+					crypt_otr_notify_socialist_millionaires_statis( crypt_state, in_accountname, in_protocol,
+														   context, 2 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT4;
 				}
 			}
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP3);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT3)
-					crypt_otr_abort_smp(crypt_state, context);
+					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
-					crypt_otr_completed_smp( context );
+					crypt_otr_notify_socialist_millionaires_statis( crypt_state, in_accountname, in_protocol, 
+														   context, 3 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 				}
 			}
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP4);
 			if (tlv) {
 				if (nextMsg != OTRL_SMP_EXPECT4)
-					crypt_otr_abort_smp(crypt_state, context);
+					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
-					crypt_otr_completed_smp( context );
+					crypt_otr_notify_socialist_millionaires_statis( crypt_state, in_accountname, in_protocol,
+														   context, 3 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 				}
 			}
@@ -267,11 +271,58 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	//printf( "crypt_otr_process_receiving end\n" );
 	//printf( "who: %s\nmsg:\n%s\n", who, message );	
 			
-	SV* temp_return = sv_2mortal( newSVpv( message, 0 ));
-	
-	return temp_return;
-	//return sv_2mortal( newSVpv( message, 0 ));		
+	//SV* temp_return = sv_2mortal( newSVpv( message, 0 ));
+
+	return newSVpv( message, 0 );
 }
+
+/* Start the Socialist Millionaires' Protocol over the current connection,
+ * using the given initial secret, and optionally a question to pass to
+ * the buddy. */
+void crypt_otr_start_smp( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max,
+					 char* who, char* secret )
+{
+	ConnContext* ctx = crypt_otr_get_context( crypt_state, in_accountname, in_protocol, who );
+
+	otrl_message_initiate_smp(crypt_state->otrl_state, &otr_ops, crypt_state,
+						 ctx, secret, strlen(secret) );
+}
+
+
+/* Start the Socialist Millionaires' Protocol over the current connection,
+ * using the given initial secret, and optionally a question to pass to
+ * the buddy. */
+void crypt_otr_start_smp_q( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max,
+					 char* who, char* secret, char* question )
+{
+	ConnContext* ctx = crypt_otr_get_context( crypt_state, in_accountname, in_protocol, who );
+
+	otrl_message_initiate_smp_q(crypt_state->otrl_state, &otr_ops, crypt_state,
+						   ctx, question, secret, strlen(secret));
+}
+
+/* Continue the Socialist Millionaires' Protocol over the current connection,
+ * using the given initial secret (ie finish step 2). */
+void crypt_otr_continue_smp( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max,
+					    char* who, const unsigned char *secret )
+{
+	ConnContext* ctx = crypt_otr_get_context( crypt_state, in_accountname, in_protocol, who );
+
+	otrl_message_respond_smp(crypt_state->otrl_state, &otr_ops, crypt_state,
+						ctx, secret, strlen(secret) );
+}
+
+/* Abort the SMP protocol.  Used when malformed or unexpected messages
+ * are received. */
+void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max,
+					 char* who )
+{
+	ConnContext* ctx = crypt_otr_get_context( crypt_state, in_accountname, in_protocol, who );
+
+	otrl_message_abort_smp(crypt_state->otrl_state, &otr_ops, crypt_state, ctx);
+}
+
+
 
 
 

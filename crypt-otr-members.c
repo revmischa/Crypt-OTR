@@ -88,4 +88,4 @@ void crypt_otr_set_error_cb( CryptOTRUserState in_state, CV* in_error_cb ) { CRY
 void crypt_otr_set_warning_cb( CryptOTRUserState in_state, CV* in_warning_cb ) { CRYPT_OTR_INSTALL_CALLBACK( in_state->warning_cb, in_warning_cb); }
 void crypt_otr_set_info_cb( CryptOTRUserState in_state, CV* in_info_cb ) { CRYPT_OTR_INSTALL_CALLBACK( in_state->info_cb, in_info_cb); }
 void crypt_otr_set_new_fpr_cb( CryptOTRUserState in_state, CV* in_fpr_cb ) { CRYPT_OTR_INSTALL_CALLBACK( in_state->new_fpr_cb, in_fpr_cb); }
-
+void crypt_otr_set_smp_request_cb( CryptOTRUserState in_state, CV* in_smp ) { CRYPT_OTR_INSTALL_CALLBACK( in_state->smp_request_cb, in_smp); } 

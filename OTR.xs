@@ -89,6 +89,19 @@ crypt_otr_process_receiving( IN CryptOTRUserState perl_state, IN char* perl_acco
 	OUTPUT:
 		RETVAL
 
+void
+crypt_otr_start_smp( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_who, IN char* perl_secret )
+
+void
+crypt_otr_start_smp_q( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_who, IN char* perl_secret, IN char* perl_question )
+
+void
+crypt_otr_continue_smp( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_who, IN char* perl_secret )
+
+void
+crypt_otr_abort_smp( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_who )
+
+
 void 
 crypt_otr_set_inject_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
@@ -118,6 +131,11 @@ crypt_otr_set_info_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 void 
 crypt_otr_set_new_fpr_cb( IN CryptOTRUserState perl_state, IN CV* perl_set ) 
+
+void 
+crypt_otr_set_smp_request_cb( IN CryptOTRUserState perl_state, IN CV* perl_set ) 
+
+
 
 
 
