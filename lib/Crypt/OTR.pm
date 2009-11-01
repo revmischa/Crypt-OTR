@@ -39,7 +39,8 @@ XSLoader::load('Crypt::OTR', $VERSION);
 
 =head1 NAME
 
-Crypt::OTR - Off-The-Record encryption library for secure instant messaging applications
+Crypt::OTR - Off-The-Record encryption library for secure instant
+messaging applications
 
 =head1 SYNOPSIS
 
@@ -56,7 +57,7 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
     );
     $otr->set_callback('inject' => \&otr_inject);
     $otr->set_callback('otr_message' => \&otr_system_message);
-    $otr->set_callback('connect' => \&otr_connect);
+    $otr->set_callback('secured' => \&otr_verified);
     $otr->set_callback('unverified' => \&otr_unverified);
 
     # create a context for user "bob"
@@ -85,7 +86,7 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
     #   probably want to lock a mutex when sending/receiving)
 
     # called when OTR is ready to send a message after massaging it.
-    # this method should transmit $message over a socket or somesuch
+    # this method should actually transmit $message to $dest_account
     sub otr_inject {
         my ($self, $account_name, $protocol, $dest_account, $message) = @_;
         $my_app->send_message_to_user($dest_account, $message);
@@ -99,7 +100,7 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
     }
 
     # called when a verified conversation is established with $from_account
-    sub connect {
+    sub verified {
         my ($self, $from_account) = @_;
         print "Started verified conversation with $from_account\n";
     }
@@ -113,7 +114,8 @@ Crypt::OTR - Off-The-Record encryption library for secure instant messaging appl
 
 =head1 DESCRIPTION
 
-Perl wrapper around libotr2 - see http://www.cypherpunks.ca/otr/README-libotr-3.2.0.txt
+Perl wrapper around libotr2 - see
+http://www.cypherpunks.ca/otr/README-libotr-3.2.0.txt
 
 =head1 EXPORT
 
@@ -126,7 +128,8 @@ None by default.
 
 =item init(%opts)
 
-This method sets up OTR and initializes the global OTR context. It is probably unsafe to call this more than once
+This method sets up OTR and initializes the global OTR context. It is
+probably unsafe to call this more than once
 
 =cut
 
@@ -163,15 +166,6 @@ sub new {
 
     my $state = crypt_otr_create_user($config_dir, $account_name, $protocol);
 
-#    crypt_otr_set_accountname($state, $account_name)
-#        if defined $account_name;
-
-#    crypt_otr_set_protocol($state, $protocol)
-#        if defined $protocol;
-
-#    crypt_otr_set_max_message_size($state, $max_message_size)
-#        if defined $max_message_size;
-
     my $self = {
         account_name     => $account_name,
         protocol         => $protocol,
@@ -189,9 +183,13 @@ sub new {
 
 Set a callback to be called when various events happen:
 
-  inject: Called when establishing a connection, or sending a fragmented message. This should send your message over whatever communication channel your application is using.
+  inject: Called when establishing a connection, or sending a
+  fragmented message. This should send your message over whatever
+  communication channel your application is using.
 
-  otr_message: Called when OTR wants to display a notification. Return 1 if the message has been displayed, return 0 if you want OTR to display the message inline.
+  otr_message: Called when OTR wants to display a notification. Return
+  1 if the message has been displayed, return 0 if you want OTR to
+  display the message inline.
 
   connect: Called when a verified conversation is established
 
@@ -233,7 +231,9 @@ sub set_callback {
 
 =item establish($user_name)
 
-Attemps to begin an OTR-encrypted conversation with $user_name. This will call the inject callback with a message containing an OTR connection attempt.
+Attemps to begin an OTR-encrypted conversation with $user_name. This
+will call the inject callback with a message containing an OTR
+connection attempt.
 
 =cut
 
@@ -247,7 +247,8 @@ sub establish {
 
 =item encrypt($user_name, $plaintext)
 
-Encrypts $plaintext for $user_name. Returns undef unless an encrypted message has been generated, in which case it returns that.
+Encrypts $plaintext for $user_name. Returns undef unless an encrypted
+message has been generated, in which case it returns that.
 
 =cut
 
@@ -274,7 +275,9 @@ sub decrypt {
 
 =item start_smp($user_name, $secret, $question)
 
-Start the Socialist Millionaires' Protocol over the current connection, using the given initial secret, and optionally a question to pass to the buddy (not supported).
+Start the Socialist Millionaires' Protocol over the current
+connection, using the given initial secret, and optionally a question
+to pass to the buddy (not supported).
 
 =cut
 
@@ -293,7 +296,8 @@ sub start_smp {
 
 =item continue_smp($user_name, $secret)
 
-Continue the Socialist Millionaires' Protocol over the current connection, using the given initial secret
+Continue the Socialist Millionaires' Protocol over the current
+connection, using the given initial secret
 
 =cut
 
@@ -355,9 +359,9 @@ http://www.cypherpunks.ca/otr
 
 =head1 TODO
 
-- More informational callbacks
+- More documentation (always)
 
-- Socialist Millionaire Protocol (verify key fingerprints)
+- More tests (always)
 
 =head1 AUTHOR
 
@@ -368,7 +372,9 @@ Mischa Spiegelmock, E<lt>mspiegelmock@gmail.comE<gt>
 
 Copyright (C) 2009 by Patrick Tierney, Mischa Spiegelmock
 
-This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.8.8 or, at your option, any later version of Perl 5 you may have available.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
 
 =cut
 
