@@ -1,1 +1,2 @@
-clear  && perl Makefile.PL PREFIX=~/perllib && make && make install
+perl -Ilib -Iblib/arch/ t/Crypt-OTR.t
+
