@@ -1,8 +1,8 @@
-use Test::More qw/no_plan/;
-BEGIN { use_ok('Crypt::OTR') };
-
 use threads;
 use threads::shared;
+
+use Test::More tests => 19;
+BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
 use warnings;
@@ -29,6 +29,7 @@ my $u2 = "bob";
 my $m1 = "Hello $u1, this is $u2";
 my $m2 = "Hello $u2, this is $u1";
 
+# socialist millionaires protocol (shared secret verification)
 my $secret = "Rosebud";
 my $question = "Which movie";
 
@@ -52,17 +53,16 @@ my %smp_request :shared = (
 	$u2 => 0,
 	);
 
-#share( %connected );
-
 Crypt::OTR->init;
-
-
 ok(test_multithreading(), "multithreading");
 
-
+# ensure only one thread at a time is doing something
+# this is to ensure there are no issues when using Crypt::OTR
+# with multiple threads. hopefully this is not needed, so it's
+# disabled for now.
 sub sync (&) {
     my $code = shift;
-    lock $otr_mutex;
+#    lock $otr_mutex;
     $code->();
 }
 
@@ -77,7 +77,6 @@ sub test_multithreading {
 		my $con = 0;
 
 		while( $con == 0 ){
-			#print "$u1 waiting for message\n";
 			sleep 1;
 
 			my $msg;
@@ -87,8 +86,6 @@ sub test_multithreading {
 			}
 
 			if( $msg ){
-				#print "** $u1 received message from $u2: $msg\n";
-				#ok($msg, "Injected OTR setup message");
 				my $resp = $alice->decrypt($u2, $msg);
 			}
 			{
@@ -131,7 +128,6 @@ sub test_multithreading {
 		# Secure the connection using SMP
 		{
 			my $sec_con;
-			#print "Starting SMP\n";
 			$alice->start_smp($u2, $secret);
 
 			until( $sec_con )
@@ -145,11 +141,12 @@ sub test_multithreading {
 				if( $msg ){
 					my $resp = $alice->decrypt($u2, $msg);
 					if ($resp){
-						print "$resp\n";
+						print "resp: $resp\n";
 					}
 				}
 
 				{
+                    pass("Secured connection with SMP");
 					lock( %secured );
 					$sec_con = $secured{ $u2 };
 				}
@@ -191,7 +188,6 @@ sub test_multithreading {
 			my $con = 0;
 
 			while( $con == 0 ){
-				#print "$u2 waiting for message\n";
 				sleep 1;
 
 				my $msg;
@@ -201,8 +197,6 @@ sub test_multithreading {
 				}
 
 				if( $msg ){
-					#print "** $u2 received message from $u1: $msg\n";
-					#ok($msg, "Injected OTR setup message");
 					my $resp = $bob->decrypt($u1, $msg);
 				}
 
@@ -218,15 +212,7 @@ sub test_multithreading {
             });
         }
         
-        # encrypt message
-        #{
-#            my $enc_resp;
-#            sync(sub {
-#                $enc_resp = $bob->encrypt($u1, "message two");
-#            });
-        #}
-
-		# Encrypt a message nad send it to Alice
+		# Encrypt a message and send it to Alice
 		{
 			my $enc_msg = $bob->encrypt($u1, $m2);
 			lock( @$alice_buf );
@@ -248,8 +234,6 @@ sub test_multithreading {
 				sleep 1;
 			}
 
-			#print "\nDecrypting: $rec_msg\n\n";
-			#print "\nDecrypted: $dec_msg\n\n";
 			ok( $dec_msg eq $m1, "Send: $m1 = Decrypted: $dec_msg");
 		}
 
@@ -271,7 +255,7 @@ sub test_multithreading {
 				{
 					my $resp = $bob->decrypt($u1, $msg);
 					if($resp){
-						print "$resp\n";
+						print "resp $resp\n";
 					}
 				}
 
@@ -281,6 +265,7 @@ sub test_multithreading {
 					$smp_req = $smp_request{ $u1 };
 				}
 
+                # takes a few steps to finish SMP
 				if( $smp_req )
 				{
 					$bob->continue_smp($u1, $secret);
@@ -331,14 +316,15 @@ sub test_init {
                              max_message_size => 2000, 
                              );
 
+    # callback to inject an encrypted message (add to recipient's buffer)
     my $inject = sub {
         my ( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
-		#print '"Sending" message from ' . "$account_name to $dest_account\n$message\n";
 
 		lock( @$dest );
         push @$dest, $message;
     };
 
+    # got a message from the OTR system (e.g. "Heartbeat received from alice")
 	my $send_system_message = sub {
 		my( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
 		
@@ -352,24 +338,29 @@ sub test_init {
 			push @$alice_buf, $message;
 		}
 	};
-	
+
+	# created an unverified connection
 	my $unverified_cb = sub {
 		my($ptr, $username) = @_;
 
-		#print "Connection started with $username\n";
+		pass("Unverified connection started with $username");
 		lock( %connected );
 		$connected{ $username } = 1;
         $established->{$username} = 1;
 	};
 
+    # created a verified connection, not tested yet
+    # TODO: add tests for fingerprint verification
 	my $secured_cb = sub {
 		my($ptr, $username) = @_;
 		
-		print "Secure connection established with $username\n";
+		pass("Secure connection established with $username");
 		lock(%secured);
 		$secured{ $username } = 1;
 	};
 	
+
+    #### self-explanatory OTR callbacks below
 	my $disconnected_cb = sub {
 		my( $ptr, $username ) = @_;
 
@@ -378,23 +369,20 @@ sub test_init {
 		lock( %disconnected );
 		$disconnected{ $username } = 1;
 	};
-	
 	my $error_cb = sub {
 		my($ptr, $accountname, $protocol, $username, $title, $primary, $secondary) = @_;
 		
 		print "Error! -- $accountname -- $protocol -- $username -- $title -- $primary -- $secondary\n";
 	};
-
 	my $warning_cb = sub {
 		my($ptr, $accountname, $protocol, $username, $title, $primary, $secondary) = @_;
 		
 		print "Warning! -- $accountname -- $protocol -- $username -- $title -- $primary -- $secondary\n";
 	};
-
 	my $info_cb = sub {
 		my($ptr, $accountname, $protocol, $username, $title, $primary, $secondary) = @_;
 		
-		print "Info -- $accountname -- $protocol -- $username -- $title -- $primary -- $secondary\n";
+		#print "Info -- $accountname -- $protocol -- $username -- $title -- $primary -- $secondary\n";
 
 		if( $accountname eq $u2 ){
 			lock( @$bob_info_buf );
@@ -405,28 +393,32 @@ sub test_init {
 	my $new_fingerprint_cb = sub {
 		my( $ptr, $accountname, $protocol, $username, $fingerprint) = @_;
 		
-		print "New fingerprint for $username = $fingerprint\n";
+		pass("New fingerprint for $username = $fingerprint");
 	};
 
 	my $still_connected_cb = sub {
 		my( $ptr, $username ) = @_;
 		
-		print "Still connected with $username\n";
+		#print "Still connected with $username\n";
 	};
 
+    # socialist millionares protocol, where one party creates a shared
+    # secret and the other party must generate the same secret
 	my $smp_request_cb = sub {
 		my( $ptr, $protocol, $username, $question ) = @_;
 		
 		if( $question ){
+            # this is never reached?
 			print "Question asked: $question\n";
 		}
 		
-		#print "$username requesting SMP shared secret\n";
+		pass("$username requesting SMP shared secret");
 
 		lock( %smp_request );
 		$smp_request{ $username } = 1;
 	};
 
+    # install callbacks
     $otr->set_callback('inject' => $inject);
     $otr->set_callback('otr_message' => $send_system_message);
 
