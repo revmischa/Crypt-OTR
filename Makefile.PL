@@ -2,13 +2,29 @@ use 5.008008;
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
+
+sub libOtrIsInstalled(){
+	if(-f('/usr/include/libotr/version.h')){
+		return 1;
+	} elsif (-f('/usr/local/include/libotr/version.h')){
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+unless( libOtrIsInstalled() ) {
+	die("OTR library not installed.  Please install and continue.");
+}
+
+
 WriteMakefile(
     NAME              => 'Crypt::OTR',
     VERSION_FROM      => 'lib/Crypt/OTR.pm', # finds $VERSION
     PREREQ_PM         => {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Crypt/OTR.pm', # retrieve abstract from module
-       AUTHOR         => 'lazarus <lazarus@>') : ()),
+       AUTHOR         => 'Mischa Spiegelmock <mspiegelmock@gmail.com>') : ()),
     LIBS              => ['-L/usr/lib -lotr'], # e.g., '-lm'
     DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
     INC               => '-I. -I/usr/include', # e.g., '-I. -I/usr/include/other'
