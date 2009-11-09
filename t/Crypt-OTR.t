@@ -36,43 +36,31 @@ my $question = "Which movie";
 my %connected :shared = (
 	$u1 => 0,
 	$u2 => 0,
-	);
+);
 
 my %disconnected :shared = (
 	$u1 => 0,
 	$u2 => 0,
-	);
+);
 
 my %secured :shared = (
 	$u1 => 0,
 	$u2 => 0,
-	);
+);
 
 my %smp_request :shared = (
 	$u1 => 0,
 	$u2 => 0,
-	);
+);
 
 Crypt::OTR->init;
 ok(test_multithreading(), "multithreading");
-
-# ensure only one thread at a time is doing something
-# this is to ensure there are no issues when using Crypt::OTR
-# with multiple threads. hopefully this is not needed, so it's
-# disabled for now.
-sub sync (&) {
-    my $code = shift;
-#    lock $otr_mutex;
-    $code->();
-}
 
 sub test_multithreading {
     my $alice_thread = async {
         my $alice = test_init($u1, $bob_buf);
         
-        sync(sub {
-            $alice->establish($u2);
-        });
+        $alice->establish($u2);
 
 		my $con = 0;
 
@@ -94,9 +82,7 @@ sub test_multithreading {
 			}
 		}
 
-        sync(sub {
-            ok($established->{$u2}, "Connection with $u2 established");
-        });
+        ok($established->{$u2}, "Connection with $u2 established");
 		
 		# Encrypt a message and send it to Bob
 		{
@@ -179,9 +165,7 @@ sub test_multithreading {
         
         # establish
         {
-            sync(sub {
-                $bob->establish($u1);
-            });
+            $bob->establish($u1);
 
             select undef, undef, undef, 1.2;
 
@@ -207,9 +191,7 @@ sub test_multithreading {
 
 			}
 
-            sync(sub {
-                ok($established->{$u1}, "Connection with $u1 established");
-            });
+            ok($established->{$u1}, "Connection with $u1 established");
         }
         
 		# Encrypt a message and send it to Alice

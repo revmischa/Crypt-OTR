@@ -82,8 +82,6 @@ messaging applications
     $otr->finish("bob");
     
     # CALLBACKS 
-    #  (if writing a multithreaded application you will
-    #   probably want to lock a mutex when sending/receiving)
 
     # called when OTR is ready to send a message after massaging it.
     # this method should actually transmit $message to $dest_account
@@ -128,8 +126,9 @@ None by default.
 
 =item init(%opts)
 
-This method sets up OTR and initializes the global OTR context. It is
-probably unsafe to call this more than once
+This method sets up OTR and should be called early at the start of
+your application, before using any OTR facilities. It is probably
+unwise to call this more than once.
 
 =cut
 
@@ -140,11 +139,14 @@ sub init {
 
 =item new(%opts)
 
-This method sets up an OTR context for an account on a protocol (e.g. sk8rD00d510 on OSCAR)                                                                                                            
+This method sets up an OTR context for an account on a protocol (e.g. "lindenstacker" on OSCAR (AIM))
 
 Options:
+
  'account_name'     => name of the account in your application
+
  'protocol'         => string identifying your application
+
  'max_message_size' => how many bytes messages should be fragmented into
 
 =cut
@@ -197,7 +199,6 @@ Set a callback to be called when various events happen:
 
 =cut
 
-        use Data::Dumper;
 sub set_callback {
     my ($self, $action, $cb) = @_;
 
@@ -370,7 +371,7 @@ Mischa Spiegelmock, E<lt>mspiegelmock@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009 by Patrick Tierney, Mischa Spiegelmock
+Copyright (C) 2010 by Patrick Tierney, Mischa Spiegelmock
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
