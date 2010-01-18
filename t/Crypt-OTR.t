@@ -7,7 +7,6 @@ BEGIN { use_ok('Crypt::OTR') };
 use strict;
 use warnings;
 
-my $otr_mutex : shared;
 my $finished : shared = 0;
 my %e;
 my $established : shared;

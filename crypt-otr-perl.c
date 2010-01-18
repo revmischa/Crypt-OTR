@@ -284,10 +284,28 @@ void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, c
 
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
-	/*
-	if (crypt_state->inject_cb)
-		SvREFCNT_dec(crypt_state->inject_cb);
-	*/
+  if (crypt_state->inject_cb)
+    SvREFCNT_dec(crypt_state->inject_cb);
+  if (crypt_state->system_message_cb)
+    SvREFCNT_dec(crypt_state->system_message_cb);
+  if (crypt_state->connected_cb)
+    SvREFCNT_dec(crypt_state->connected_cb);
+  if (crypt_state->unverified_cb)
+    SvREFCNT_dec(crypt_state->unverified_cb);
+  if (crypt_state->disconnected_cb)
+    SvREFCNT_dec(crypt_state->disconnected_cb);
+  if (crypt_state->stillconnected_cb)
+    SvREFCNT_dec(crypt_state->stillconnected_cb);
+  if (crypt_state->error_cb)
+    SvREFCNT_dec(crypt_state->error_cb);
+  if (crypt_state->warning_cb)
+    SvREFCNT_dec(crypt_state->warning_cb);
+  if (crypt_state->info_cb)
+    SvREFCNT_dec(crypt_state->info_cb);
+  if (crypt_state->new_fpr_cb)
+    SvREFCNT_dec(crypt_state->new_fpr_cb);
+  if (crypt_state->smp_request_cb)
+    SvREFCNT_dec(crypt_state->smp_request_cb);
 
   if (crypt_state->root)
     free( crypt_state->root );

@@ -78,7 +78,6 @@ CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 #define CRYPT_OTR_INSTALL_CALLBACK(userstate_cb, perl_cb) SvREFCNT_inc(perl_cb); userstate_cb = perl_cb;
 
 void crypt_otr_set_inject_cb( CryptOTRUserState in_state, CV* in_inject_cb ){ CRYPT_OTR_INSTALL_CALLBACK( in_state->inject_cb, in_inject_cb ); }
-
 void crypt_otr_set_system_message_cb( CryptOTRUserState in_state, CV* in_sys_mes_cb ){ CRYPT_OTR_INSTALL_CALLBACK(in_state->system_message_cb, in_sys_mes_cb); }
 void crypt_otr_set_connected_cb( CryptOTRUserState in_state, CV* in_connected_cb ){ CRYPT_OTR_INSTALL_CALLBACK( in_state->connected_cb, in_connected_cb); }
 void crypt_otr_set_unverified_cb( CryptOTRUserState in_state, CV* in_unver_cb ) { CRYPT_OTR_INSTALL_CALLBACK( in_state->unverified_cb, in_unver_cb); }
