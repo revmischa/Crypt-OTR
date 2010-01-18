@@ -7,7 +7,7 @@ use Carp qw/croak/;
 
 use AutoLoader;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -57,7 +57,7 @@ messaging applications
     );
     $otr->set_callback('inject' => \&otr_inject);
     $otr->set_callback('otr_message' => \&otr_system_message);
-    $otr->set_callback('secured' => \&otr_verified);
+    $otr->set_callback('verified' => \&otr_verified);
     $otr->set_callback('unverified' => \&otr_unverified);
 
     # create a context for user "bob"
@@ -149,15 +149,17 @@ Options:
 
  'max_message_size' => how many bytes messages should be fragmented into
 
+ 'config_dir'       => where to store keys and fingerprints, defaults to C<$ENV{HOME}/.otr/>
+
 =cut
 
 sub new {
     my ($class, %opts) = @_;
 
-    my $account_name = delete $opts{account_name} || 'crypt_otr_user';
-    my $protocol      = delete $opts{protocol} || 'crypt_otr';
+    my $account_name     = delete $opts{account_name}     || 'crypt_otr_user';
+    my $protocol         = delete $opts{protocol}         || 'crypt_otr';
     my $max_message_size = delete $opts{max_message_size} || 0;
-    my $config_dir = delete $opts{config_dir} || "$ENV{HOME}/.otr/";
+    my $config_dir       = delete $opts{config_dir}       || "$ENV{HOME}/.otr/";
 
     croak "$config_dir is not writable"
         if -e $config_dir && ! -w $config_dir;
@@ -189,13 +191,29 @@ Set a callback to be called when various events happen:
   fragmented message. This should send your message over whatever
   communication channel your application is using.
 
-  otr_message: Called when OTR wants to display a notification. Return
-  1 if the message has been displayed, return 0 if you want OTR to
-  display the message inline.
+  otr_message: Called when OTR wants to display a notification to the
+  user. Return 1 if the message has been displayed, return 0 if you
+  want OTR to display the message inline.
 
-  connect: Called when a verified conversation is established
+  verified: A conncetion has been established and the other party's
+  key fingerprint has been verified
 
-  unverified: called when an unverified conversation is established
+  unverified: A connection has been established but the key
+  fingerprint has not been verified
+
+  disconnect: Connection has been disconnected
+
+  system_message: OTR has a system message to display to the user
+
+  error: Error message to display
+
+  warning: Warning message to display
+
+  info: Informative message to display
+
+  new_fingerprint: Received a new fingerprint for a user
+
+  smp_request: Identity verification challenge request
 
 =cut
 
@@ -209,18 +227,18 @@ sub set_callback {
     };
 
     my $callback_map = {
-        'inject' => \&crypt_otr_set_inject_cb,
-        'otr_message' => \&crypt_otr_set_system_message_cb,
-        'secured' => \&crypt_otr_set_connected_cb,
-        'unverified' => \&crypt_otr_set_unverified_cb,
-		'disconnect' => \&crypt_otr_set_disconnected_cb,
-		'system_message' => \&crypt_otr_set_system_message_cb,
-		'still_connected' => \&crypt_otr_set_stillconnected_cb,
-		'error' => \&crypt_otr_set_error_cb,
-		'warning' => \&crypt_otr_set_warning_cb,
-		'info' => \&crypt_otr_set_info_cb,
-		'new_fingerprint' => \&crypt_otr_set_new_fpr_cb,
-		'smp_request' => \&crypt_otr_set_smp_request_cb,
+        'inject'          => \&crypt_otr_set_inject_cb,
+        'otr_message'     => \&crypt_otr_set_system_message_cb,
+        'verified'        => \&crypt_otr_set_connected_cb,
+        'unverified'      => \&crypt_otr_set_unverified_cb,
+        'disconnect'      => \&crypt_otr_set_disconnected_cb,
+        'system_message'  => \&crypt_otr_set_system_message_cb,
+        'still_connected' => \&crypt_otr_set_stillconnected_cb,
+        'error'           => \&crypt_otr_set_error_cb,
+        'warning'         => \&crypt_otr_set_warning_cb,
+        'info'            => \&crypt_otr_set_info_cb,
+        'new_fingerprint' => \&crypt_otr_set_new_fpr_cb,
+        'smp_request'     => \&crypt_otr_set_smp_request_cb,
     };
 
     my $cb_method = $callback_map->{$action}
@@ -340,17 +358,30 @@ sub DESTROY {
     crypt_otr_cleanup($self->_us);
 }
 
+
+##############
+
+
+
+
+### UTILITY METHODS
+
 # get userstate
 sub _us { $_[0]->{state} }
+
 sub account_name { $_[0]->{account_name} }
 sub protocol { $_[0]->{protocol} }
 sub config_dir { $_[0]->{config_dir} }
 sub max_message_size { $_[0]->{max_message_size} }
+
+# contextual information passed to xsubs
 sub _args {
     my $self = shift;
     ($self->_us, $self->account_name, $self->protocol, $self->max_message_size);
 }
 
+
+#########
 
 =back
 
