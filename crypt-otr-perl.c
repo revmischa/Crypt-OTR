@@ -283,15 +283,19 @@ void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, c
 }
 
 
-// Todo: make this actually clean things up.
-
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
 	/*
 	if (crypt_state->inject_cb)
 		SvREFCNT_dec(crypt_state->inject_cb);
 	*/
 
-	free( crypt_state->keyfile );
-	free( crypt_state->fprfile );
-	free( crypt_state );
+  if (crypt_state->root)
+    free( crypt_state->root );
+
+  if (crypt_state->otrl_state)
+    otrl_userstate_free( crypt_state->otrl_state );
+
+  free( crypt_state->keyfile );
+  free( crypt_state->fprfile );
+  free( crypt_state );
 }
