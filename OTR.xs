@@ -88,9 +88,13 @@ crypt_otr_set_smp_request_cb( IN CryptOTRUserState perl_state, IN CV* perl_set )
 
 SV*
 crypt_otr_get_keyfile( IN CryptOTRUserState perl_state )
+	OUTPUT:
+		RETVAL
 
 SV*
 crypt_otr_get_fprfile( IN CryptOTRUserState perl_state )
+	OUTPUT:
+		RETVAL
 
 
 

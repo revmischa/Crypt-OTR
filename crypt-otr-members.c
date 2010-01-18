@@ -77,12 +77,6 @@ CV* crypt_otr_get_new_fpr_cb() { return crypt_otr_new_fpr_cb; }
 
 
 
-// accessors
-char* crypt_otr_get_keyfile( CryptOTRUserState in_state ) { return in_state->keyfile; }
-char* crypt_otr_get_fprfile( CryptOTRUserState in_state ) { return in_state->fprfile; }
-
-
-
 // Callback setters
 #define CRYPT_OTR_INSTALL_CALLBACK(userstate_cb, perl_cb) SvREFCNT_inc(perl_cb); userstate_cb = perl_cb;
 

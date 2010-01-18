@@ -283,6 +283,13 @@ void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, c
 }
 
 
+///// Accessors
+SV* crypt_otr_get_keyfile( CryptOTRUserState in_state ) { return newSVpv( in_state->keyfile, 0 ); }
+SV* crypt_otr_get_fprfile( CryptOTRUserState in_state ) { return newSVpv( in_state->fprfile, 0 ); }
+
+
+
+
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
   if (crypt_state->inject_cb)
     SvREFCNT_dec(crypt_state->inject_cb);
