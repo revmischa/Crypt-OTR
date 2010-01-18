@@ -7,7 +7,7 @@ use Carp qw/croak/;
 
 use AutoLoader;
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -112,12 +112,15 @@ messaging applications
 
 =head1 DESCRIPTION
 
-Perl wrapper around libotr2 - see
+Perl wrapper around libotr - see
 http://www.cypherpunks.ca/otr/README-libotr-3.2.0.txt
+
+This module is experimental and unfinished, not yet recommended for
+production or important systems.
 
 =head1 EXPORT
 
-None by default.
+No namespace pollution will be tolerated.
 
 =head1 METHODS
 
@@ -149,7 +152,7 @@ Options:
 
  'max_message_size' => how many bytes messages should be fragmented into
 
- 'config_dir'       => where to store keys and fingerprints, defaults to C<$ENV{HOME}/.otr/>
+ 'config_dir'       => where to store keys and fingerprints, defaults to $ENV{HOME}/.otr
 
 =cut
 
@@ -406,10 +409,16 @@ http://www.cypherpunks.ca/otr
 
 - More tests (always)
 
+- Find leaking scalars
+
 =head1 AUTHOR
 
 Patrick Tierney, E<lt>patrick.l.tierney@gmail.comE<gt>
 Mischa Spiegelmock, E<lt>mspiegelmock@gmail.comE<gt>
+
+This module is unfinished, not very tested, and incomplete. Would you
+like to help make it better? Send an email to one of the authors, we'd
+love to get more people involved
 
 =head1 COPYRIGHT AND LICENSE
 
