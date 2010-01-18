@@ -21,7 +21,7 @@ unless( libOtrIsInstalled() ) {
 WriteMakefile(
     NAME              => 'Crypt::OTR',
     VERSION_FROM      => 'lib/Crypt/OTR.pm', # finds $VERSION
-    PREREQ_PM         => {}, # e.g., Module::Name => 1.1
+    PREREQ_PM         => {},
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Crypt/OTR.pm', # retrieve abstract from module
        AUTHOR         => 'Mischa Spiegelmock <mspiegelmock@gmail.com>') : ()),

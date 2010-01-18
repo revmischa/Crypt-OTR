@@ -5,10 +5,6 @@
 // PRIVATE NON-CALLBACK, NON-PERL FUNCTIONS
 ///////////////////////////////////////////////
 
-/* Quetion: should these return values use
- *	sv_2mortal?
- */
-
 static void
 crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
 {	
@@ -240,7 +236,7 @@ void crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char* accoun
 
 	if( key_error ) {
 		printf("***********************************\n");
-		printf("OTR key generation failed!  Please make the following directory: %s\n", keyfile);		
+		printf("OTR key generation failed!  Please ensure the following path is writable: %s\n", keyfile);
 		printf("***********************************\n");
 	}
 	else {
@@ -363,6 +359,7 @@ void crypt_otr_abort_smp_context( CryptOTRUserState crypt_state, ConnContext* co
 CryptOTRUserState crypt_otr_create_new_userstate(){
 	CryptOTRUserState crypt_state  = malloc( sizeof( struct crypt_otr_user_state ) );
 
+        crypt_state->privkey_loaded = 0;
 	crypt_state->otrl_state = NULL;
 	crypt_state->root = NULL;
 	crypt_state->keyfile = NULL;

@@ -8,6 +8,7 @@ crypt-otr.h
 fallback/const-c.inc
 fallback/const-xs.inc
 lib/Crypt/OTR.pm
+lib/Crypt/OTR/PublicKey.pm
 Makefile.PL
 MANIFEST
 META.yml			Module meta-data (added by MakeMaker)

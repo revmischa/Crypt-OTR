@@ -1,7 +1,7 @@
 use threads;
 use threads::shared;
 
-use Test::More tests => 19;
+use Test::More tests => 21;
 BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
@@ -53,12 +53,25 @@ my %smp_request :shared = (
 );
 
 Crypt::OTR->init;
+
+my $alice = test_init($u1, $bob_buf);
+my $bob   = test_init($u2, $alice_buf);
+
+ok($alice, "Initialized identities, generating private keys...");
+$alice->load_privkey;
+$bob->load_privkey;
+
 ok(test_multithreading(), "multithreading");
+ok(test_signing(), "signing");
+
+sub test_signing {
+    my $msg = q/TEST MESSAGE FOR SIGNING/ x 100;
+    
+}
+
 
 sub test_multithreading {
     my $alice_thread = async {
-        my $alice = test_init($u1, $bob_buf);
-        
         $alice->establish($u2);
 
         my $con = 0;
@@ -160,8 +173,6 @@ sub test_multithreading {
     };
 
     my $bob_thread = async {
-        my $bob = test_init($u2, $alice_buf);
-        
         # establish
         {
             $bob->establish($u1);
@@ -293,7 +304,7 @@ sub test_init {
 
     my $otr = new Crypt::OTR(
         account_name     => $user,
-        protocol_name    => "crypt-otr-test",
+        protocol         => "crypt-otr-test",
         max_message_size => 2000, 
     );
 

@@ -25,6 +25,9 @@ crypt_otr_create_user( IN char* perl_root, IN char* perl_account, IN char* perl_
 		RETVAL
 
 void 
+crypt_otr_load_privkey( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+
+void 
 crypt_otr_establish( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_username )
 
 void
@@ -96,6 +99,35 @@ crypt_otr_get_fprfile( IN CryptOTRUserState perl_state )
 	OUTPUT:
 		RETVAL
 
+SV*
+crypt_otr_sign( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_msg_hash )
+	OUTPUT:
+		RETVAL
+
+unsigned short
+crypt_otr_verify( IN char* perl_msg_hash, IN char* perl_sig, IN char* pubkey_data, IN unsigned int pubkey_size, IN unsigned short pubkey_type )
+	OUTPUT:
+		RETVAL
+
+SV*
+crypt_otr_get_pubkey_str( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+        OUTPUT:
+                RETVAL
+
+char*
+crypt_otr_get_pubkey_data( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+        OUTPUT:
+                RETVAL
+
+unsigned short
+crypt_otr_get_pubkey_type( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+        OUTPUT:
+                RETVAL
+
+unsigned int
+crypt_otr_get_pubkey_size( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+        OUTPUT:
+                RETVAL
 
 
 

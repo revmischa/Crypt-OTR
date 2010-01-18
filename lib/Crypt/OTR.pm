@@ -4,10 +4,10 @@ use 5.010000;
 use strict;
 use warnings;
 use Carp qw/croak/;
-
+use Crypt::OTR::PublicKey;
 use AutoLoader;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -163,6 +163,11 @@ sub new {
     my $protocol         = delete $opts{protocol}         || 'crypt_otr';
     my $max_message_size = delete $opts{max_message_size} || 0;
     my $config_dir       = delete $opts{config_dir}       || "$ENV{HOME}/.otr/";
+
+    croak "Unknown opts: " . join(', ', keys %opts) if keys %opts;
+
+    $account_name = lc $account_name;
+    $protocol     = lc $protocol;
 
     croak "$config_dir is not writable"
         if -e $config_dir && ! -w $config_dir;
@@ -342,6 +347,20 @@ sub abort_smp {
 	crypt_otr_abort_smp($self->_args, $user_name);
 }
 
+# takes a digest of a message to sign (not the message itself)
+sub sign {
+    my ($self, $message_digest) = @_;
+    my $sig = crypt_otr_sign($self->_args, $message_digest);
+}
+
+# same as above
+sub verify {
+    my ($self, $message_digest, $sig, $pubkey) = @_;
+    my $ok = crypt_otr_verify($message_digest, $sig, $pubkey->data, $pubkey->size, $pubkey->type);
+}
+
+
+
 =item finish($user_name)
 
 Ends an encrypted conversation, no new messages from $user_name will
@@ -393,6 +412,38 @@ sub keyfile {
 sub fprfile {
     my $self = shift;
     return crypt_otr_get_fprfile($self->_us);
+}
+
+# attempt to load or generate a private key, may block for a long time
+sub load_privkey {
+    my $self = shift;
+
+    crypt_otr_load_privkey($self->_args);
+}
+
+sub pubkey_data {
+    my $self = shift;
+    return crypt_otr_get_pubkey_str($self->_args);
+}
+
+# opaque public key structure
+sub pubkey {
+    my $self = shift;
+
+    return $self->{_pubkey} if $self->{_pubkey};
+
+    # make sure we have a key
+    $self->load_privkey;
+
+    my $pk = Crypt::OTR::PublicKey->new(
+        data => crypt_otr_get_pubkey_data($self->_args),
+        type => crypt_otr_get_pubkey_type($self->_args),
+        size => crypt_otr_get_pubkey_size($self->_args),
+    );
+
+    $self->{_pubkey} = $pk;
+
+    return $pk;
 }
 
 #########

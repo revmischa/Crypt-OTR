@@ -1,4 +1,4 @@
-
+#include <gcrypt.h>
 
 /////////////////////////////////////////
 //  CRYPT-OTR PERL FUNCTIONS
@@ -43,18 +43,30 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 	return crypt_state;
 }
 
-void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, 
-					 char* in_username )
-{		
-	if( otrl_privkey_read( in_state->otrl_state, in_state->keyfile ) ) {
-		printf( "Could not read OTR key from %s\n", in_state->keyfile);
-		crypt_otr_create_privkey( in_state, in_account, in_proto );
-	}
-	else {
-		printf( "Loaded private key file from %s\n", in_state->keyfile );
-	}
+// load private key from file, or create new one
+// (this may block for several minutes while generating a key)
+void crypt_otr_load_privkey( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max ) {
+  if (in_state->privkey_loaded)
+    return;
 
-	crypt_otr_startstop(in_state, in_account, in_proto, in_username, 1 );
+  in_state->privkey_loaded = 1;
+
+  gcry_error_t res = otrl_privkey_read( in_state->otrl_state, in_state->keyfile );
+
+  if( res ) {
+    printf( "Could not read OTR key from %s\n", in_state->keyfile);
+    crypt_otr_create_privkey( in_state, in_account, in_proto );
+  }
+  else {
+    printf( "Loaded private key file from %s\n", in_state->keyfile );
+  }
+}
+
+void crypt_otr_establish( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max, 
+					 char* in_username ) {		
+  
+  crypt_otr_load_privkey( in_state, in_account, in_proto, in_max );
+  crypt_otr_startstop(in_state, in_account, in_proto, in_username, 1 );
 }
 
 
@@ -287,8 +299,67 @@ void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, c
 SV* crypt_otr_get_keyfile( CryptOTRUserState in_state ) { return newSVpv( in_state->keyfile, 0 ); }
 SV* crypt_otr_get_fprfile( CryptOTRUserState in_state ) { return newSVpv( in_state->fprfile, 0 ); }
 
+OtrlPrivKey* crypt_otr_get_privkey( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+  crypt_otr_load_privkey( in_state, account, proto, maxsize );  // try to ensure a privkey is loaded
+  return otrl_privkey_find( in_state->otrl_state, account, proto );
+}
 
+char* crypt_otr_get_pubkey_data( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+  OtrlPrivKey* privkey = crypt_otr_get_privkey(in_state, account, proto, maxsize);
+  return privkey->pubkey_data;
+}
+size_t crypt_otr_get_pubkey_size( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+  OtrlPrivKey* privkey = crypt_otr_get_privkey(in_state, account, proto, maxsize);
+  return privkey->pubkey_datalen;
+}
+unsigned short crypt_otr_get_pubkey_type( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+  OtrlPrivKey* privkey = crypt_otr_get_privkey(in_state, account, proto, maxsize);
+  return privkey->pubkey_type;
+}
 
+///// Signing
+// would be nice to make this take a scalarref instead of a char*
+SV* crypt_otr_sign( CryptOTRUserState in_state, char *account, char *proto, int maxsize, char *msghash ) {
+  OtrlPrivKey *privkey = crypt_otr_get_privkey( in_state, account, proto, maxsize );
+  if (! privkey) {
+    perror("Could not find privkey\n");
+    return NULL;
+  }
+
+  unsigned char *sig;
+  size_t siglen;
+
+  otrl_privkey_sign(&sig, &siglen, privkey, msghash, strlen(msghash));
+
+  // copy result, make SV
+  SV *sig_sv = newSVpvn(sig, siglen);
+
+  // we are responsible for freeing the signature
+  free(sig);
+
+  return sig_sv;
+}
+
+SV* crypt_otr_get_pubkey_str( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+  OtrlPrivKey *privkey = crypt_otr_get_privkey( in_state, account, proto, maxsize );
+  SV *privkey_sv = newSVpvn(privkey->pubkey_data, privkey->pubkey_datalen);
+  return privkey_sv;
+}
+
+unsigned int crypt_otr_verify( unsigned char *msghash, unsigned char *sig, unsigned char *pubkey_data,
+                               size_t pubkey_length, unsigned short pubkey_type) {
+
+  // create s-expression object representing the public key
+  gcry_sexp_t pubkey;
+
+  gcry_sexp_new(&pubkey, pubkey_data, pubkey_length, 1);
+
+  gcry_error_t err = otrl_privkey_verify( sig, strlen(sig), pubkey_type, pubkey_data, msghash, strlen(msghash) );
+
+  gcry_sexp_release(pubkey);
+
+  return err;
+}
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
   if (crypt_state->inject_cb)

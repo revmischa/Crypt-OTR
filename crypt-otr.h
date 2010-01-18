@@ -23,6 +23,7 @@ struct crypt_otr_user_state {
 	char* keyfile;
 	char* fprfile;	
 	unsigned int max_size;
+        unsigned short privkey_loaded;
 
 	CV* inject_cb;
 	CV* system_message_cb;
@@ -101,7 +102,6 @@ int crypt_otr_context_to_trust(ConnContext *context);
 /* Accessors */
 
 CryptOTRUserState get_state( SV* sv_state );
-
 
 
 #include "crypt-otr-utils.c"
