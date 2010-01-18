@@ -97,7 +97,12 @@ typedef enum {
 
 int crypt_otr_context_to_trust(ConnContext *context);
 
+
+/* Accessors */
+
 CryptOTRUserState get_state( SV* sv_state );
+
+
 
 #include "crypt-otr-utils.c"
 #include "crypt-otr-members.c"
