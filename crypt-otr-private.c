@@ -375,6 +375,7 @@ CryptOTRUserState crypt_otr_create_new_userstate(){
 	crypt_state->warning_cb = NULL;
 	crypt_state->info_cb = NULL;
 	crypt_state->new_fpr_cb = NULL;
+	crypt_state->smp_request_cb = NULL;
 
 	return crypt_state;
 }
