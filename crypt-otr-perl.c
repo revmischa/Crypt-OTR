@@ -354,11 +354,12 @@ unsigned int crypt_otr_verify( unsigned char *msghash, unsigned char *sig, unsig
 
   gcry_sexp_new(&pubkey, pubkey_data, pubkey_length, 1);
 
-  gcry_error_t err = otrl_privkey_verify( sig, strlen(sig), pubkey_type, pubkey_data, msghash, strlen(msghash) );
+  gcry_error_t err = otrl_privkey_verify( sig, strlen(sig), pubkey_type, pubkey, msghash, strlen(msghash) );
 
   gcry_sexp_release(pubkey);
 
-  return err;
+  //  printf("type: %d err: %d, msg: %s\n", pubkey_type, err, gcry_strerror(err));
+  return err == 0;
 }
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
