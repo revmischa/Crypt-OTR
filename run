@@ -1,6 +1,6 @@
 sudo make clean
-perl Makefile.PL
+/opt/bin/perl Makefile.PL
 make
 sudo make install
-perl -Ilib -Iblib/arch/ t/Crypt-OTR.t
+/opt/bin/perl -Ilib -Iblib/arch/ t/Crypt-OTR.t
 

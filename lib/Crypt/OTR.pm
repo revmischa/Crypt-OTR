@@ -1,6 +1,6 @@
 package Crypt::OTR;
 
-use 5.008000;
+use 5.010000;
 use strict;
 use warnings;
 use Carp qw/croak/;
