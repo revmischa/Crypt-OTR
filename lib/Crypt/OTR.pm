@@ -251,7 +251,7 @@ sub set_callback {
 
     my $cb_method = $callback_map->{$action}
     or croak "unknown callback $action";
-
+	
     $cb_method->($self->_us, $wrapped_cb);
 }
 

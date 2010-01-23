@@ -1,5 +1,6 @@
 use threads;
 use threads::shared;
+use Digest::SHA1  qw(sha1);
 
 use Test::More tests => 24;
 BEGIN { use_ok('Crypt::OTR') };
@@ -52,14 +53,52 @@ my %smp_request :shared = (
 	$u2 => 0,
 );
 
+my $multithread_done :shared = 0;
+
 Crypt::OTR->init;
 
 ok(test_multithreading(), "multithreading");
 ok(test_signing(), "signing");
 
 sub test_signing {
-    my $msg = q/TEST MESSAGE FOR SIGNING/ x 100;
-    
+	# These tests shouldn't start until the multithreading test is over
+
+	my $sign_thread = async {
+		#wait until both
+		until($multithread_done > 1){
+			print STDERR "Sleeping";
+			sleep 1;
+		}
+
+		my $msg = q/TEST MESSAGE FOR SIGNING/ x 100;
+
+		# Flush the buffers, in case any remained from the previous test
+		$alice_buf = [];
+		$bob_buf = [];
+
+		my $alice = test_init($u1, $bob_buf);
+		$alice->load_privkey;
+		$alice->establish($u2);
+
+		ok($alice, "Set up $u1");
+
+		my $bob = test_init($u2, $alice_buf);
+		$bob->load_privkey;
+		$bob->establish($u1);
+
+		ok($bob, "Set up $u2");
+		
+		my $digest = sha1($msg);
+
+		my $sig = $alice->sign($digest);
+		
+		ok( $bob->verify($digest, $sig, $alice->pubkey), "Verifying signature");
+
+	};
+	
+	$_->join($sign_thread);
+	
+	return 1;
 }
 
 
@@ -167,6 +206,8 @@ sub test_multithreading {
             }
 
             ok( $dis, "Disconnected from $u2" );
+			
+			$multithread_done++;
         }
 
     };
@@ -294,11 +335,14 @@ sub test_multithreading {
             }
 
             ok( $dis, "Disconnected from $u1" );
+
+			$multithread_done++;
         }
 
     };
 
     $_->join foreach ($alice_thread, $bob_thread);
+
 
     return 1;
 }
