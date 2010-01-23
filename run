@@ -1,6 +1,7 @@
-sudo make clean
+#!/bin/bash
+#sudo make clean
 perl Makefile.PL
 make
-sudo make install
+#sudo make install
 perl -Ilib -Iblib/arch/ t/Crypt-OTR.t
 

@@ -1,6 +1,5 @@
 use threads;
-use threads::shared;
-use Digest::SHA1  qw(sha1);
+use threads::shared;use Digest::SHA1  qw(sha1);
 
 use Test::More tests => 24;
 BEGIN { use_ok('Crypt::OTR') };
@@ -96,7 +95,7 @@ sub test_signing {
 
 	};
 	
-	$_->join($sign_thread);
+        $sign_thread->join;
 	
 	return 1;
 }
