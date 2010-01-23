@@ -12,6 +12,8 @@ my %e;
 my $established : shared;
 $established = share(%e);
 
+# Stores any pending messages
+# Models TCP messages that would arrive over network  
 my $alice_buf = [];
 my $bob_buf = [];
 
@@ -32,6 +34,7 @@ my $m2 = "Hello $u2, this is $u1";
 my $secret = "Rosebud";
 my $question = "Which movie";
 
+# stores whether u1 or u2 is connected or not
 my %connected :shared = (
 	$u1 => 0,
 	$u2 => 0,
@@ -42,11 +45,13 @@ my %disconnected :shared = (
 	$u2 => 0,
 );
 
+# stores whether u1 or u2 has established a secure connection
 my %secured :shared = (
 	$u1 => 0,
 	$u2 => 0,
 );
 
+# stores any pending SMP requests
 my %smp_request :shared = (
 	$u1 => 0,
 	$u2 => 0,
@@ -54,12 +59,8 @@ my %smp_request :shared = (
 
 Crypt::OTR->init;
 
-my $alice = test_init($u1, $bob_buf);
-my $bob   = test_init($u2, $alice_buf);
-
-ok($alice, "Initialized identities, generating private keys...");
-$alice->load_privkey;
-$bob->load_privkey;
+#ok($alice, "Initialized identities, generating private keys...");
+#ok($alice, "Generated / loaded private keys...");
 
 ok(test_multithreading(), "multithreading");
 ok(test_signing(), "signing");
@@ -69,15 +70,21 @@ sub test_signing {
     
 }
 
-
 sub test_multithreading {
     my $alice_thread = async {
-        $alice->establish($u2);
+		# Note Bene: the callback must be declared in the same thread as where they will be called 
+		my $alice = test_init($u1, $bob_buf);
+		ok($alice, "Initialized $u1 identity, generating private key...");
+		$alice->load_privkey;
+		ok($alice, "Generated / loaded private key for $u1");
 
+        $alice->establish($u2);
+		
         my $con = 0;
 
         while( $con == 0 ){
             sleep 1;
+			print STDERR "$u1 loop";
 
             my $msg;
             {
@@ -86,12 +93,16 @@ sub test_multithreading {
             }
 
             if( $msg ){
+				print STDERR "$u1 got response";
                 my $resp = $alice->decrypt($u2, $msg);
+				print STDERR "Alice response: $resp";
             }
+
             {
                 lock( %connected );
                 $con = $connected{ $u2 }
             }
+			#print STDERR "Alice conn loop\n";
         }
 
         ok($established->{$u2}, "Connection with $u2 established");
@@ -173,8 +184,12 @@ sub test_multithreading {
     };
 
     my $bob_thread = async {
-        # establish
-        {
+		# Note Bene: the callback must be declared in the same thread as where they will be called 
+		my $bob   = test_init{
+			ok($bob, "Initialized $u2 identity, generating private key...");
+			$bob->load_privkey;
+			ok($bob, "Generated / loaded private key for $u2");
+
             $bob->establish($u1);
 
             select undef, undef, undef, 1.2;
@@ -182,7 +197,9 @@ sub test_multithreading {
             my $con = 0;
 
             while( $con == 0 ){
-                sleep 1;
+                print STDERR "$u2 loop";
+
+				sleep 1;
 
                 my $msg;
                 {
@@ -192,6 +209,7 @@ sub test_multithreading {
 
                 if( $msg ){
                     my $resp = $bob->decrypt($u1, $msg);
+					print STDERR "Bob response: $resp";
                 }
 
                 {
@@ -199,10 +217,14 @@ sub test_multithreading {
                     $con = $connected{ $u1 };
                 }
 
+			#print STDERR "Bob conn loop\n";
+
             }
 
             ok($established->{$u1}, "Connection with $u1 established");
-        }
+        };
+
+        ($u2, $alice_buf)
         
         # Encrypt a message and send it to Alice
         {
@@ -312,6 +334,8 @@ sub test_init {
     my $inject = sub {
         my ( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
 
+		#print STDERR "Injecting from $account_name to $dest_account : $message.\n";
+
         lock( @$dest );
         push @$dest, $message;
     };
@@ -319,6 +343,9 @@ sub test_init {
     # got a message from the OTR system (e.g. "Heartbeat received from alice")
     my $send_system_message = sub {
         my( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
+
+		print STDERR "Got system message.\n";
+
         
         if( $dest_account eq $u2 ){
             lock( @$bob_buf );

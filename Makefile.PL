@@ -13,9 +13,25 @@ sub libOtrIsInstalled(){
 	}
 }
 
+sub libGcryptIsInstalled(){
+	if(-f('/usr/include/gcrypt.h')){
+		return 1;
+	} elsif (-f('/usr/local/include/gcrypt.h')){
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
 unless( libOtrIsInstalled() ) {
 	die("OTR library not installed.  Please install and continue.");
 }
+
+unless( libGcryptIsInstalled() ) {
+	die("gcrypt not installed.  Please install and continue.");
+}
+
 
 
 WriteMakefile(
