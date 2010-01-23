@@ -1,7 +1,7 @@
 use threads;
 use threads::shared;
 
-use Test::More tests => 21;
+use Test::More tests => 24;
 BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
@@ -69,6 +69,7 @@ sub test_multithreading {
 		my $alice = test_init($u1, $bob_buf);
 		ok($alice, "Initialized identities, generating private keys...");
 		$alice->load_privkey;
+		ok($alice, "Generated / loaded private key for $u1...");
 
         $alice->establish($u2);
 
@@ -173,9 +174,11 @@ sub test_multithreading {
     my $bob_thread = async {
         # establish
 		my $bob   = test_init($u2, $alice_buf);
+		ok($bob, "Initialized identities, generating private keys...");
 
         {
 			$bob->load_privkey;
+			ok($bob, "Generated / loaded private key for $21...");
 
             $bob->establish($u1);
 
