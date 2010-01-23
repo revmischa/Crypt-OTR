@@ -54,13 +54,6 @@ my %smp_request :shared = (
 
 Crypt::OTR->init;
 
-my $alice = test_init($u1, $bob_buf);
-my $bob   = test_init($u2, $alice_buf);
-
-ok($alice, "Initialized identities, generating private keys...");
-$alice->load_privkey;
-$bob->load_privkey;
-
 ok(test_multithreading(), "multithreading");
 ok(test_signing(), "signing");
 
@@ -72,6 +65,11 @@ sub test_signing {
 
 sub test_multithreading {
     my $alice_thread = async {
+
+		my $alice = test_init($u1, $bob_buf);
+		ok($alice, "Initialized identities, generating private keys...");
+		$alice->load_privkey;
+
         $alice->establish($u2);
 
         my $con = 0;
@@ -174,7 +172,11 @@ sub test_multithreading {
 
     my $bob_thread = async {
         # establish
+		my $bob   = test_init($u2, $alice_buf);
+
         {
+			$bob->load_privkey;
+
             $bob->establish($u1);
 
             select undef, undef, undef, 1.2;
