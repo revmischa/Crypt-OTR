@@ -63,10 +63,12 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level, con
 static void 	crypt_otr_message_disconnect( CryptOTRUserState crypt_state, ConnContext* ctx );
 ConnContext* 	crypt_otr_get_context( CryptOTRUserState crypt_state, char* accountname, char* protocol, char* username );
 void 		crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char *accountname, const char *protocol);
+void crypt_otr_load_privkey( CryptOTRUserState in_state, const char* in_account, const char* in_proto, int in_max );
 
 void process_sending_im( char* who, char* message );
 
 /* Callbacks */
+void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char *fingerprint );
 static OtrlPolicy 	policy_cb(void *opdata, ConnContext *context);
 static const char *	protocol_name_cb(void *opdata, const char *protocol);
 static void 		protocol_name_free_cb(void *opdata, const char *protocol_name);

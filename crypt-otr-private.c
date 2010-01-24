@@ -315,7 +315,7 @@ ConnContext* crypt_otr_get_context( CryptOTRUserState crypt_state, char* account
 	return ctx;
 }
 
-void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
+void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char *fingerprint )
 {
 	if( crypt_state->new_fpr_cb )
 		crypt_otr_notify_new_fingerprint( crypt_state, accountname, protocol,

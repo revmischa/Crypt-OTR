@@ -45,7 +45,7 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 
 // load private key from file, or create new one
 // (this may block for several minutes while generating a key)
-void crypt_otr_load_privkey( CryptOTRUserState in_state, char* in_account, char* in_proto, int in_max ) {
+void crypt_otr_load_privkey( CryptOTRUserState in_state, const char* in_account, const char* in_proto, int in_max ) {
   if (in_state->privkey_loaded)
     return;
 

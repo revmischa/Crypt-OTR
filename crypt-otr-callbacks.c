@@ -1,4 +1,5 @@
 
+
 ///////////////////////////////////
 // CALLBACKS
 //////////////////////////////////
@@ -22,7 +23,13 @@ static void protocol_name_free_cb(void *opdata, const char *protocol_name)
 static void create_privkey_cb(CryptOTRUserState opdata, const char *accountname,
 	const char *protocol)
 {
-	crypt_otr_create_privkey(opdata, accountname, protocol);
+
+  // this may get called even if a privkey file already exists.
+  // load_privkey will load it if present, otherwise it will
+  // generate a new key
+  crypt_otr_load_privkey(opdata, accountname, protocol, 0);
+
+  // crypt_otr_create_privkey(opdata, accountname, protocol);
 }
 
 /* Report whether you think the given user is online.  Return 1 if
@@ -78,7 +85,7 @@ static void confirm_fingerprint_cb(CryptOTRUserState opdata, OtrlUserState us,
 	const char *accountname, const char *protocol, const char *username,
 	unsigned char fingerprint[20])
 {
-	char readable[45];
+	unsigned char readable[45];
 
 	otrl_privkey_hash_to_human(readable, fingerprint);
 
