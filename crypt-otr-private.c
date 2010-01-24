@@ -323,7 +323,7 @@ void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accou
 } 
 
 
-void crypt_otr_notify_socialist_millionaires_statis( CryptOTRUserState crypt_state, char* accountname, char* protocol,
+void crypt_otr_notify_socialist_millionaires_status( CryptOTRUserState crypt_state, char* accountname, char* protocol,
 										   ConnContext* context,
 										   int progress )
 {
