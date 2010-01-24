@@ -162,7 +162,7 @@ sub new {
     my $account_name     = delete $opts{account_name}     || 'crypt_otr_user';
     my $protocol         = delete $opts{protocol}         || 'crypt_otr';
     my $max_message_size = delete $opts{max_message_size} || 0;
-    my $config_dir       = delete $opts{config_dir}       || "$ENV{HOME}/.otr/";
+    my $config_dir       = delete $opts{config_dir}       || "$ENV{HOME}/.otr";
 
     croak "Unknown opts: " . join(', ', keys %opts) if keys %opts;
 

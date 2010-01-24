@@ -23,19 +23,19 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 	crypt_state->otrl_state = otrl_userstate_create();	
 	
 	temp_keyfile = malloc( (strlen(in_root) + 
-					    strlen(PRIVKEY_FILE_NAME) +
-					    strlen(account_name) +
-					    strlen(protocol) +
-					    2 + 1)*sizeof(char) ); // +1 for the \0
+                                strlen(PRIVKEY_FILE_NAME) +
+                                strlen(account_name) +
+                                strlen(protocol) +
+                                3 + 1)*sizeof(char) ); // +1 for the \0
 
 	temp_fingerprintfile =  malloc( (strlen(in_root) + 
-							   strlen(STORE_FILE_NAME) +
-							   strlen(account_name) +
-							   strlen(protocol) + 
-							   2 + 1)*sizeof(char) ); // +1 for the \0 
+                                         strlen(STORE_FILE_NAME) +
+                                         strlen(account_name) +
+                                         strlen(protocol) + 
+                                         3 + 1)*sizeof(char) ); // +1 for the \0 
 		
-	sprintf( temp_keyfile, "%s%s-%s-%s", in_root, PRIVKEY_FILE_NAME, account_name, protocol);
-	sprintf( temp_fingerprintfile, "%s%s-%s-%s", in_root, STORE_FILE_NAME, account_name, protocol);
+	sprintf( temp_keyfile, "%s/%s-%s-%s", in_root, PRIVKEY_FILE_NAME, account_name, protocol);
+	sprintf( temp_fingerprintfile, "%s/%s-%s-%s", in_root, STORE_FILE_NAME, account_name, protocol);
 				
 	crypt_state->keyfile = temp_keyfile;
 	crypt_state->fprfile = temp_fingerprintfile;
