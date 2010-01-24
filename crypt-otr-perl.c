@@ -202,7 +202,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 				if (nextMsg != OTRL_SMP_EXPECT2)
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
-					crypt_otr_notify_socialist_millionaires_statis( crypt_state, in_accountname, in_protocol,
+					crypt_otr_notify_socialist_millionaires_status( crypt_state, in_accountname, in_protocol,
 														   context, 2 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT4;
 				}
@@ -212,7 +212,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 				if (nextMsg != OTRL_SMP_EXPECT3)
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
-					crypt_otr_notify_socialist_millionaires_statis( crypt_state, in_accountname, in_protocol, 
+					crypt_otr_notify_socialist_millionaires_status( crypt_state, in_accountname, in_protocol, 
 														   context, 3 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 				}
@@ -222,7 +222,7 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 				if (nextMsg != OTRL_SMP_EXPECT4)
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
-					crypt_otr_notify_socialist_millionaires_statis( crypt_state, in_accountname, in_protocol,
+					crypt_otr_notify_socialist_millionaires_status( crypt_state, in_accountname, in_protocol,
 														   context, 3 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 				}
