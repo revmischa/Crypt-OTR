@@ -8,6 +8,8 @@
 static void
 crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message )
 {	
+  if (! crypt_state->inject_cb) return;
+
 	dSP;
 		
 	ENTER;
@@ -31,6 +33,8 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 						 const char* protocol, const char* username, 
 						 const char* message )
 {
+  if (! crypt_state->system_message_cb) return;
+
 	dSP;
 	int num_items_on_stack;
 	
@@ -93,6 +97,8 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 
 void crypt_otr_notify_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char fingerprint[20] )
 {
+  if (! crypt_state->new_fpr_cb) return;
+
 	dSP;
 	
 	ENTER;
@@ -121,6 +127,8 @@ void crypt_otr_smp_notify( CryptOTRUserState crypt_state, SMPNotifyType notify,
 					  char* protocol, char* username,
 					  char* question )
 {
+  if (! crypt_state->smp_request_cb) return;
+
 	dSP;
 	
 	ENTER;
@@ -165,6 +173,9 @@ void crypt_otr_handle_connected(CryptOTRUserState crypt_state, ConnContext* cont
 
 void crypt_otr_callback_one_string( CV* callback_sub, char* username )
 {
+  if (! callback_sub)
+    return;
+
 	dSP;
 	
 	ENTER;
