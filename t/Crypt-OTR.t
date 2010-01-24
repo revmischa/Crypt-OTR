@@ -62,8 +62,10 @@ ok(test_signing(), "signing");
 sub test_signing {
 	# These tests shouldn't start until the multithreading test is over
 
+	print STDERR "Starting signing test\n";
+
 	my $sign_thread = async {
-		#wait until both
+		# wait until both alice and bob pass multithreading
 		until($multithread_done > 1){
 			print STDERR "Sleeping";
 			sleep 1;
@@ -95,7 +97,7 @@ sub test_signing {
 
 	};
 	
-        $sign_thread->join;
+	$sign_thread->join;
 	
 	return 1;
 }
