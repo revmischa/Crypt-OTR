@@ -220,7 +220,7 @@ sub test_multithreading {
 
         {
 			$bob->load_privkey;
-			ok($bob, "Generated / loaded private key for $21...");
+			ok($bob, "Generated / loaded private key for $u2...");
 
             $bob->establish($u1);
 
