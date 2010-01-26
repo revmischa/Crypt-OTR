@@ -102,6 +102,7 @@ crypt_otr_get_fprfile( IN CryptOTRUserState perl_state )
 SV*
 crypt_otr_sign( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_msg_hash )
 	OUTPUT:
+
 		RETVAL
 
 unsigned short
@@ -128,6 +129,24 @@ unsigned int
 crypt_otr_get_pubkey_size( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
         OUTPUT:
                 RETVAL
+
+char*
+crypt_otr_get_privkey_fingerprint( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+	OUTPUT:
+		RETVAL
+
+int
+crypt_otr_read_fingerprints( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* file_path)
+	OUTPUT:
+		RETVAL
+
+int
+crypt_otr_write_fingerprints( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* file_path)
+	OUTPUT:
+		RETVAL
+
+void
+crypt_otr_forget_all( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max)
 
 
 

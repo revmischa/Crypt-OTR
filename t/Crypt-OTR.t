@@ -68,14 +68,15 @@ $multithread_done = 2;
 ok(test_signing(), "signing");
 ok(test_fingerprint_read_write(), "fingerprint read/write");
 
-ok( test_tester(), "tester");
-
 # Creates two new users and a message
 # User 1 Hashes the massage and signs the digest
 # User 2 checks the digest against User 1's public key
 
 sub test_signing {
 	# These tests shouldn't start until the multithreading test is over
+	flush_shared();
+
+	sleep 1;
 
 	my $sign_thread = async {
 		# wait until both alice and bob pass multithreading
@@ -85,10 +86,6 @@ sub test_signing {
 		}
 
 		my $msg = q/TEST MESSAGE FOR SIGNING/ x 100;
-
-		# Flush the buffers, in case any remained from the previous test
-		@$alice_buf = ();
-		@$bob_buf = ();
 
 		my $alice = test_init($u1, $bob_buf);
 		$alice->load_privkey;
@@ -106,6 +103,10 @@ sub test_signing {
 		my $digest = sha1($msg);
 		my $sig = $alice->sign($digest);
 		
+		# This is actually meaningless, though at the moment I can't seem to find
+		# a good way to check pass errors from OTR.  They are printed though
+		ok($sig, "Successfully signed message");
+		
 		# technically bob should generate his own digest of the message
 		ok( $bob->verify($digest, $sig, $alice->pubkey), "Verifying signature");
 	};
@@ -117,26 +118,133 @@ sub test_signing {
 	return 1;
 }
 
+sub flush_shared {
+
+	my $flush_thread = async {
+		# Flush the buffers, in case any remained from the previous test
+		@$alice_buf = ();
+		@$bob_buf = ();
+
+		$connected{ $u1 } = 0; 
+		$connected{ $u2 } = 0; 
+		$disconnected{ $u1 } = 0;
+		$disconnected{ $u2 } = 0;
+		$secured{ $u1 } = 0;
+		$secured{ $u2 } = 0;
+		$smp_request{ $u1 } = 0;
+		$smp_request{ $u2 } = 0;
+
+		};
+	
+	$flush_thread->join;
+}
+
 # Create a new user, generate a fingerprint, write the fingerprint to disk
 # Dumps all fingerprints, load the fingerprint from disk
 # Check to make sure the fingerprints are equal
 
 sub test_fingerprint_read_write {
-	my $fpr_thread = async {	
+
+	my $alice_fingerprint_path;
+	my $alice_fingerprint;
+	my $alice_new_fpr_path;
+	
+	flush_shared();
+
+	sleep 1;
+
+	my $alice_fpr_thread = async {	
 		until( $sign_thread_done){
 			sleep 1;
 		}
 
-		my $charles = test_init($u3, $charles_buf);
-		$charles->load_privkey;
-		$charles->establish($u2);
+		my $alice = test_init($u1, $bob_buf);
+		$alice->load_privkey;
+        $alice->establish($u2);
+
+        my $con = 0;
+
+        while( $con == 0 ){
+            sleep 1;
+
+            my $msg;
+            {
+                lock( @$alice_buf );
+                $msg = shift @$alice_buf;
+            }
+
+            if( $msg ){
+                my $resp = $alice->decrypt($u2, $msg);
+            }
+            {
+                lock( %connected );
+                $con = $connected{ $u2 }
+            }
+        }
+
+		# At this point a fingerprint file should have been generated
 		
-		# Did this automatically generate a fingerprint file?
-		# check to make sure
-		ok( $charles->fprfile, "Fingerprint file generated");
+		$alice_fingerprint_path = $alice->fprfile;
+		
+		print STDERR "Alice fingerprint path:\n$alice_fingerprint_path\n";
+		
+		# write the fingerprint to disk
+		
+		$alice_new_fpr_path = $alice_fingerprint_path . "-fingerprint_read_write";
+
+		warn "About to write fprfile";
+		
+		$alice->write_fprfile( $alice_new_fpr_path);
+
+		warn "About to get fingerprint data";
+
+		$alice_fingerprint = $alice->fingerprint_data;
+		
+		print STDERR "Alice fingerprint:\n$alice_fingerprint\n";
+
 	};
-	
-	$fpr_thread->join;
+
+	my $bob_fpr_thread = async {
+		until( $sign_thread_done){
+			sleep 1;
+		}
+
+		my $bob   = test_init($u2, $alice_buf);
+
+        {
+			$bob->load_privkey;
+            $bob->establish($u1);
+
+            select undef, undef, undef, 1.2;
+
+            my $con = 0;
+
+            while( $con == 0 ){
+                sleep 1;
+
+                my $msg;
+                {
+                    lock( @$bob_buf );
+                    $msg = shift @$bob_buf;
+                }
+
+                if( $msg ){
+                    my $resp = $bob->decrypt($u1, $msg);
+                }
+
+                {
+                    lock( %connected );
+                    $con = $connected{ $u1 };
+                }
+
+            }
+
+            ok($established->{$u1}, "Connection with $u1 established");
+		}		
+			
+	};
+
+    $_->join foreach ($alice_fpr_thread, $bob_fpr_thread);
 
 	return 1;
 }
@@ -382,7 +490,6 @@ sub test_multithreading {
     };
 
     $_->join foreach ($alice_thread, $bob_thread);
-
 
     return 1;
 }

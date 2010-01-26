@@ -113,9 +113,14 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 		err = otrl_message_fragment_and_send(&otr_ops, crypt_state, context,
 									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, &message);
 
+		// Checking for errors
+		if(err) {
+			crypt_otr_print_error("Fragmenting and sending message");
+		}
+		
 		otrl_message_free(newmessage);
 	}
-		
+
 	return newSVpv( message, 0 );
 }
 
@@ -317,27 +322,97 @@ unsigned short crypt_otr_get_pubkey_type( CryptOTRUserState in_state, char *acco
   return privkey->pubkey_type;
 }
 
+char* crypt_otr_get_privkey_fingerprint( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+	
+	char* fingerprint, fpr_ptr, accountname, protocol;
+	fingerprint = malloc(45);
+
+	// I don't know if it's safe practice to use the vars passed from XS
+	accountname = account;
+	protocol = proto;
+	
+	printf( "About to call otrl_privkey_fingerprint\n");
+
+	fpr_ptr = otrl_privkey_fingerprint(in_state->otrl_state, fingerprint, accountname, protocol);
+	
+	if( fpr_ptr){
+		// Create perl var, return it
+		SV *sig_sv = newSVpvn( fingerprint, 0);
+		
+		free(fingerprint);
+
+		printf("About to return\n");
+		return sig_sv;
+	} 
+	
+	crypt_otr_print_error("Getting fingerprint");
+	
+	// There was an error, free memory
+	free(fingerprint);
+	
+	return ;
+}
+
+char* crypt_otr_get_privkey_fingerprint_raw( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
+
+}
+
+/* Read the fingerprint store from a file on disk into the 
+ * OtrlUserState stored in given CryptOTRUserState
+ */
+int crypt_otr_read_fingerprints( CryptOTRUserState in_state, char* account, char* proto, int maxsize, char* file_path) {
+	return otrl_privkey_read_fingerprints( in_state->otrl_state, file_path, NULL, NULL);
+}
+
+/* Write the fingerprint store from a given CryptOTRUserState OtrUserState to a file on disk. */
+int crypt_otr_write_fingerprints( CryptOTRUserState in_state, char* account, char* proto, int maxsize, char* file_path) {
+	return otrl_privkey_write_fingerprints( in_state->otrl_state, file_path);
+}
+
+/* Forget all private keys for a given UserState */
+void crypt_otr_forget_all( CryptOTRUserState in_state, char* account, char* proto, int maxsize) {
+	otrl_privkey_forget_all(in_state->otrl_state);
+}
+
+
+
+
 ///// Signing
 // would be nice to make this take a scalarref instead of a char*
 SV* crypt_otr_sign( CryptOTRUserState in_state, char *account, char *proto, int maxsize, char *msghash ) {
-  OtrlPrivKey *privkey = crypt_otr_get_privkey( in_state, account, proto, maxsize );
-  if (! privkey) {
-    perror("Could not find privkey\n");
-    return NULL;
-  }
 
-  unsigned char *sig;
-  size_t siglen;
+	OtrlPrivKey *privkey = crypt_otr_get_privkey( in_state, account, proto, maxsize );
+	if (! privkey) {
+		perror("Could not find privkey\n");
+		return NULL;
+	}
 
-  otrl_privkey_sign(&sig, &siglen, privkey, msghash, strlen(msghash));
+	unsigned char *sig;
+	size_t siglen;
+	gcry_error_t sign_error;
+	SV *sig_sv;
 
-  // copy result, make SV
-  SV *sig_sv = newSVpvn(sig, siglen);
+	sign_error = otrl_privkey_sign(&sig, &siglen, privkey, msghash, strlen(msghash));
 
-  // we are responsible for freeing the signature
-  free(sig);
+	if(sign_error){
+		// There has to be a better way to pass an error,
+		// though string equality checking seems to be broken for the strings
+		// passed to Perl through XS, oh well
+		crypt_otr_print_error("Signing Data");
+	} else {
+		// copy result, make SV
+		sig_sv = newSVpvn(sig, siglen);
+	}
 
-  return sig_sv;
+	// Debugging printout
+	//printf("\nSig:\n-->%s<--\n\n", sig);
+	//printf("Sig length = %u\n", strlen(sig));
+	//printf("Msg length = %u\n", strlen(msghash));
+
+	// we are responsible for freeing the signature
+	free(sig);
+
+	return sig_sv;
 }
 
 SV* crypt_otr_get_pubkey_str( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
@@ -346,20 +421,34 @@ SV* crypt_otr_get_pubkey_str( CryptOTRUserState in_state, char *account, char *p
   return privkey_sv;
 }
 
+
+// 
+
 unsigned int crypt_otr_verify( unsigned char *msghash, unsigned char *sig, unsigned char *pubkey_data,
                                size_t pubkey_length, unsigned short pubkey_type) {
+	// Debugging printout
+	// Checking to see that the signature didn't get corrupted from perl to c
+	//printf("\nSig:\n-->%s<--\n\n", sig);
+	// Checking to make sure this is 0, the only type 
+	//printf("Privkey type:\n-->%u<--\n", pubkey_type);
+	//printf("Sig length = %u\n", strlen(sig));
+	//printf("Msg length = %u\n", strlen(msghash));
 
-  // create s-expression object representing the public key
-  gcry_sexp_t pubkey;
+	// create s-expression object representing the public key
+	gcry_sexp_t pubkey;
 
-  gcry_sexp_new(&pubkey, pubkey_data, pubkey_length, 1);
+	gcry_sexp_new(&pubkey, pubkey_data, pubkey_length, 1);
 
-  gcry_error_t err = otrl_privkey_verify( sig, strlen(sig), pubkey_type, pubkey, msghash, strlen(msghash) );
+	gcry_error_t err = otrl_privkey_verify( sig, strlen(sig), pubkey_type, pubkey, msghash, strlen(msghash) );
 
-  gcry_sexp_release(pubkey);
+	if(err){
+		crypt_otr_print_error("Verifying data");
+	}
+	
+	gcry_sexp_release(pubkey);
 
-  //  printf("type: %d err: %d, msg: %s\n", pubkey_type, err, gcry_strerror(err));
-  return err == 0;
+	//  printf("type: %d err: %d, msg: %s\n", pubkey_type, err, gcry_strerror(err));
+	return err == 0;
 }
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){

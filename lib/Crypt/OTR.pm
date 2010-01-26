@@ -426,6 +426,12 @@ sub pubkey_data {
     return crypt_otr_get_pubkey_str($self->_args);
 }
 
+sub fingerprint_data {
+	my $self = shift;
+	return crypt_otr_get_privkey_fingerprint($self->_args);
+}
+
+
 # opaque public key structure
 sub pubkey {
     my $self = shift;
@@ -445,6 +451,32 @@ sub pubkey {
 
     return $pk;
 }
+
+
+
+# read a stored fingerprint file from disk
+sub read_fprfile {
+	my ($self, $fpr_filepath) = @_;
+	return crypt_otr_read_fingerprints($self->_args, $fpr_filepath);
+}
+
+# Write the fingerprint unique to your userstate to disk
+sub write_fprfile{
+	my ($self, $fpr_filepath) = @_;
+	return crypt_otr_write_fingerprints($self->_args, $fpr_filepath);
+}
+
+# Forget all private keys for your user state
+sub forget_all{
+	my $self = shift;
+	
+	crypt_otr_forget_all($self->_args);
+}
+
+
+
+
+
 
 #########
 

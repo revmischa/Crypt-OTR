@@ -390,3 +390,8 @@ CryptOTRUserState crypt_otr_create_new_userstate(){
 
 	return crypt_state;
 }
+
+
+void crypt_otr_print_error(char* err_string){
+	printf("\n******************\nERROR: %s\n******************\n\n", err_string);
+}
