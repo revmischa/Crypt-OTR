@@ -53,7 +53,7 @@ void crypt_otr_load_privkey( CryptOTRUserState in_state, const char* in_account,
 
   gcry_error_t res = otrl_privkey_read( in_state->otrl_state, in_state->keyfile );
 
-  if( res ) {
+  if( res || ! otrl_privkey_find(in_state->otrl_state, in_account, in_proto) ) {
     printf( "Could not read OTR key from %s\n", in_state->keyfile);
     crypt_otr_create_privkey( in_state, in_account, in_proto );
   }
