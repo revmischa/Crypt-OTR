@@ -12,6 +12,9 @@ my %e;
 my $established : shared;
 $established = share(%e);
 
+my @test_alice:shared;
+my $test_alice_buf = \@test_alice;
+
 my $alice_buf = [];
 my $bob_buf = [];
 my $charles_buf = [];
@@ -65,6 +68,7 @@ $multithread_done = 2;
 ok(test_signing(), "signing");
 ok(test_fingerprint_read_write(), "fingerprint read/write");
 
+ok( test_tester(), "tester");
 
 # Creates two new users and a message
 # User 1 Hashes the massage and signs the digest
@@ -73,8 +77,6 @@ ok(test_fingerprint_read_write(), "fingerprint read/write");
 sub test_signing {
 	# These tests shouldn't start until the multithreading test is over
 
-	print STDERR "Starting signing test\n";
-
 	my $sign_thread = async {
 		# wait until both alice and bob pass multithreading
 		until($multithread_done > 1){
@@ -82,40 +84,30 @@ sub test_signing {
 			sleep 1;
 		}
 
-		print STDERR "About to make message\n";
 		my $msg = q/TEST MESSAGE FOR SIGNING/ x 100;
 
 		# Flush the buffers, in case any remained from the previous test
-		$alice_buf = [];
-		$bob_buf = [];
+		@$alice_buf = ();
+		@$bob_buf = ();
 
-		print STDERR "About to init alice\n";
 		my $alice = test_init($u1, $bob_buf);
-		print STDERR "About to load key\n";
 		$alice->load_privkey;
-		print STDERR "About to establish with bob\n";
 		$alice->establish($u2);
 
 		ok($alice, "Set up $u1");
 
-		my $bob = test_init($u2, $alice_buf);
+		my $bob = test_init($u2, $test_alice_buf);
 		$bob->load_privkey;
 		$bob->establish($u1);
 
 		ok($bob, "Set up $u2");
 		
-		print STDERR "About to digest\n";
 		# alice creates a digest and signs it
 		my $digest = sha1($msg);
-
-		print STDERR "About to sign\n";
 		my $sig = $alice->sign($digest);
 		
-		print STDERR "About to verify\n";
 		# technically bob should generate his own digest of the message
 		ok( $bob->verify($digest, $sig, $alice->pubkey), "Verifying signature");
-
-		print STDERR "About to end\n";
 	};
 	
 	$sign_thread->join;
