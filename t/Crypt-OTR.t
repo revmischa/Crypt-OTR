@@ -14,9 +14,11 @@ $established = share(%e);
 
 my $alice_buf = [];
 my $bob_buf = [];
+my $charles_buf = [];
 
 share( @$alice_buf );
 share( @$bob_buf );
+share( @$charles_buf );
 
 my $bob_info_buf = [];
 
@@ -24,6 +26,7 @@ share( @$bob_info_buf );
 
 my $u1 = "alice";
 my $u2 = "bob";
+my $u3 = "charles";
 
 my $m1 = "Hello $u1, this is $u2";
 my $m2 = "Hello $u2, this is $u1";
@@ -53,11 +56,19 @@ my %smp_request :shared = (
 );
 
 my $multithread_done :shared = 0;
+my $sign_thread_done :shared = 0;
 
 Crypt::OTR->init;
 
-ok(test_multithreading(), "multithreading");
+#ok(test_multithreading(), "multithreading");
+$multithread_done = 2;
 ok(test_signing(), "signing");
+ok(test_fingerprint_read_write(), "fingerprint read/write");
+
+
+# Creates two new users and a message
+# User 1 Hashes the massage and signs the digest
+# User 2 checks the digest against User 1's public key
 
 sub test_signing {
 	# These tests shouldn't start until the multithreading test is over
@@ -71,14 +82,18 @@ sub test_signing {
 			sleep 1;
 		}
 
+		print STDERR "About to make message\n";
 		my $msg = q/TEST MESSAGE FOR SIGNING/ x 100;
 
 		# Flush the buffers, in case any remained from the previous test
 		$alice_buf = [];
 		$bob_buf = [];
 
+		print STDERR "About to init alice\n";
 		my $alice = test_init($u1, $bob_buf);
+		print STDERR "About to load key\n";
 		$alice->load_privkey;
+		print STDERR "About to establish with bob\n";
 		$alice->establish($u2);
 
 		ok($alice, "Set up $u1");
@@ -89,16 +104,48 @@ sub test_signing {
 
 		ok($bob, "Set up $u2");
 		
+		print STDERR "About to digest\n";
+		# alice creates a digest and signs it
 		my $digest = sha1($msg);
 
+		print STDERR "About to sign\n";
 		my $sig = $alice->sign($digest);
 		
+		print STDERR "About to verify\n";
+		# technically bob should generate his own digest of the message
 		ok( $bob->verify($digest, $sig, $alice->pubkey), "Verifying signature");
 
+		print STDERR "About to end\n";
 	};
 	
 	$sign_thread->join;
+
+	$sign_thread_done = 1;
 	
+	return 1;
+}
+
+# Create a new user, generate a fingerprint, write the fingerprint to disk
+# Dumps all fingerprints, load the fingerprint from disk
+# Check to make sure the fingerprints are equal
+
+sub test_fingerprint_read_write {
+	my $fpr_thread = async {	
+		until( $sign_thread_done){
+			sleep 1;
+		}
+
+		my $charles = test_init($u3, $charles_buf);
+		$charles->load_privkey;
+		$charles->establish($u2);
+		
+		# Did this automatically generate a fingerprint file?
+		# check to make sure
+		ok( $charles->fprfile, "Fingerprint file generated");
+	};
+	
+	$fpr_thread->join;
+
 	return 1;
 }
 
@@ -183,13 +230,13 @@ sub test_multithreading {
                 }
 
                 {
-                    pass("Secured connection with SMP");
                     lock( %secured );
                     $sec_con = $secured{ $u2 };
                 }
 
                 sleep 1;
             }
+			pass("Secured connection with SMP");
         }
 
         # Disconnect
