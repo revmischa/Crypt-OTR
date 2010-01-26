@@ -58,19 +58,28 @@ my %smp_request :shared = (
 	$u2 => 0,
 );
 
+my %new_fingerprint :shared = (
+	$u1 => 0,
+	$u2 => 0,
+);
+
 my $multithread_done :shared = 0;
 my $sign_thread_done :shared = 0;
 
 Crypt::OTR->init;
 
-#ok(test_multithreading(), "multithreading");
-$multithread_done = 2;
+ok(test_multithreading(), "multithreading");
+#$multithread_done = 2;
 ok(test_signing(), "signing");
 ok(test_fingerprint_read_write(), "fingerprint read/write");
 
+
+# TODO:
+# This test is not complete, verify does not return 0
+
 # Creates two new users and a message
-# User 1 Hashes the massage and signs the digest
-# User 2 checks the digest against User 1's public key
+# Alice hashes the message and signs the digest
+# Bob checks the digest using  Alices's public key
 
 sub test_signing {
 	# These tests shouldn't start until the multithreading test is over
@@ -118,6 +127,7 @@ sub test_signing {
 	return 1;
 }
 
+# Used to reset all values so another conversation based test can start
 sub flush_shared {
 
 	my $flush_thread = async {
@@ -133,11 +143,18 @@ sub flush_shared {
 		$secured{ $u2 } = 0;
 		$smp_request{ $u1 } = 0;
 		$smp_request{ $u2 } = 0;
+		$new_fingerprint{ $u1 } = 0;
+		$new_fingerprint{ $u2 } = 0;
+
 
 		};
 	
 	$flush_thread->join;
 }
+
+# TODO:
+# This test is not complete, the OTR function to print fingerprints segfaults
+# 
 
 # Create a new user, generate a fingerprint, write the fingerprint to disk
 # Dumps all fingerprints, load the fingerprint from disk
@@ -182,8 +199,18 @@ sub test_fingerprint_read_write {
             }
         }
 
-		# At this point a fingerprint file should have been generated
+		my $new_fpr = 0;
 		
+		while( $new_fpr == 0 ){
+			sleep 1;
+			
+			{
+				lock( %new_fingerprint );
+				$new_fpr = $new_fingerprint{ $u1 };
+			}
+		}
+		
+		# At this point a fingerprint file should have been generated
 		$alice_fingerprint_path = $alice->fprfile;
 		
 		print STDERR "Alice fingerprint path:\n$alice_fingerprint_path\n";
@@ -198,12 +225,17 @@ sub test_fingerprint_read_write {
 
 		warn "About to get fingerprint data";
 
-		$alice_fingerprint = $alice->fingerprint_data;
-		
+		# this function segfaults at the moment,
+        # specifically whet the otrl_privkey_fingerprint function is called
+		#$alice_fingerprint = $alice->fingerprint_data;		
+		$alice_fingerprint = $alice->fingerprint_data_raw;
+
 		print STDERR "Alice fingerprint:\n$alice_fingerprint\n";
 
 	};
 
+
+	# The bob thread simply establishes a connection so a new fingerprint is generated
 	my $bob_fpr_thread = async {
 		until( $sign_thread_done){
 			sleep 1;
@@ -249,6 +281,13 @@ sub test_fingerprint_read_write {
 	return 1;
 }
 
+
+
+# Main test thread:
+# - Loading / generating private keys
+# - Establishing a conversation
+# - Establishing a secure conversation with SMP
+# - Disconnecting
 
 sub test_multithreading {
     my $alice_thread = async {
@@ -580,6 +619,9 @@ sub test_init {
     
     my $new_fingerprint_cb = sub {
         my( $ptr, $accountname, $protocol, $username, $fingerprint) = @_;
+
+		lock( %new_fingerprint );
+		$new_fingerprint{ $username } = 1;
         
         pass("New fingerprint for $username = $fingerprint");
     };

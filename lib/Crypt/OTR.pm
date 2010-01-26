@@ -431,6 +431,11 @@ sub fingerprint_data {
 	return crypt_otr_get_privkey_fingerprint($self->_args);
 }
 
+sub fingerprint_data_raw {
+	my $self = shift;
+	return crypt_otr_get_privkey_fingerprint_raw($self->_args);
+}
+
 
 # opaque public key structure
 sub pubkey {

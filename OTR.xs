@@ -135,6 +135,11 @@ crypt_otr_get_privkey_fingerprint( IN CryptOTRUserState perl_state, IN char* per
 	OUTPUT:
 		RETVAL
 
+char*
+crypt_otr_get_privkey_fingerprint_raw( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max )
+	OUTPUT:
+		RETVAL
+
 int
 crypt_otr_read_fingerprints( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* file_path)
 	OUTPUT:

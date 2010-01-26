@@ -334,8 +334,11 @@ char* crypt_otr_get_privkey_fingerprint( CryptOTRUserState in_state, char *accou
 	printf( "About to call otrl_privkey_fingerprint\n");
 
 	fpr_ptr = otrl_privkey_fingerprint(in_state->otrl_state, fingerprint, accountname, protocol);
+	printf( "Done calling otrl_privkey_fingerprint\n");
 	
 	if( fpr_ptr){
+		
+		printf( "About to create perl var\n");
 		// Create perl var, return it
 		SV *sig_sv = newSVpvn( fingerprint, 0);
 		
@@ -355,6 +358,35 @@ char* crypt_otr_get_privkey_fingerprint( CryptOTRUserState in_state, char *accou
 
 char* crypt_otr_get_privkey_fingerprint_raw( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
 
+	char* fingerprint, fpr_ptr, accountname, protocol;
+	fingerprint = malloc(20);
+
+	// I don't know if it's safe practice to use the vars passed from XS
+	accountname = account;
+	protocol = proto;
+
+	printf( "About to call otrl_privkey_fingerprint_raw\n");
+
+	fpr_ptr = otrl_privkey_fingerprint_raw(in_state->otrl_state, fingerprint, accountname, protocol);
+
+	printf( "Done calling otrl_privkey_fingerprint_raw\n");
+
+
+	if( fpr_ptr){
+		// Create perl var, return it
+		SV *sig_sv = newSVpvn( fingerprint, 0);
+		
+		free(fingerprint);
+
+		return sig_sv;
+	} 
+
+	crypt_otr_print_error("Getting fingerprint raw");
+	
+	// There was an error, free memory
+	free(fingerprint);
+	
+	return ;
 }
 
 /* Read the fingerprint store from a file on disk into the 
