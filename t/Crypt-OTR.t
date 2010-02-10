@@ -1,7 +1,7 @@
 use threads;
 use threads::shared;use Digest::SHA1  qw(sha1);
 
-use Test::More tests => 24;
+use Test::More tests => 20;
 BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
@@ -70,8 +70,8 @@ Crypt::OTR->init;
 
 ok(test_multithreading(), "multithreading");
 #$multithread_done = 2;
-ok(test_signing(), "signing");
-ok(test_fingerprint_read_write(), "fingerprint read/write");
+#ok(test_signing(), "signing");
+#ok(test_fingerprint_read_write(), "fingerprint read/write");
 
 
 # TODO:
