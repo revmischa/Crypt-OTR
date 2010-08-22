@@ -291,13 +291,18 @@ sub encrypt {
 
 Decrypt a message from $user_name, returns plaintext if successful, otherwise undef
 
+In list context, returns ($plaintext, $should_discard). If
+$should_discard is set, you should ignore the message entirely as it
+is an internal OTR protocol message or message fragment.
+
 =cut
 
 sub decrypt {
     my ($self, $user_name, $ciphertext) = @_;
 
     return undef unless $ciphertext;
-    return crypt_otr_process_receiving($self->_args, $user_name, $ciphertext);
+    my ($plain, $should_discard) = crypt_otr_process_receiving($self->_args, $user_name, $ciphertext);
+    return wantarray ? ($plain, $should_discard) : $plain;
 }
 
 =item start_smp($user_name, $secret, $question)

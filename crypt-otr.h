@@ -58,6 +58,9 @@ void 		crypt_otr_handle_stillconnected( CryptOTRUserState in_state, char* userna
 static int 	crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, const char* message );
 static void 	crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message );
 
+SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, 
+                                  char* who, char* message, short *should_discard );
+
 void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level, const char* accountname, const char* protocol, const char* username, const char* title, const char* primary, const char* secondary );
 
 static void 	crypt_otr_message_disconnect( CryptOTRUserState crypt_state, ConnContext* ctx );

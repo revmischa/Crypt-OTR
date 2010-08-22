@@ -125,11 +125,13 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 }
 
 /*
- * returns whether a otr_message was received
- * sets *message to NULL, when it was an internal otr message
+ * returns plaintext if successful.
+ * returns status boolean in should_discard.
+ * if should_discard is true, this was an internal OTR protocol
+ * message and should be ignored by the application.
  */
 SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, 
-						    char* who, char* message )
+                                  char* who, char* message, short *should_discard )
 {
     char* decrypted_message = NULL;
     char* ret_message = NULL;
@@ -144,12 +146,14 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	NextExpectedSMP nextMsg;
     SV* ret;
 
+    *should_discard = 0;
+
 	if( !who || !message )
 		return newSVpv(NULL, 0);
 
-	res = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
-							accountname, protocol, username, message,
-							&decrypted_message, &tlvs, NULL, NULL );
+	*should_discard = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
+                                              accountname, protocol, username, message,
+                                              &decrypted_message, &tlvs, NULL, NULL );
 
 	if (decrypted_message) {
         /* copy decrypted_message */
@@ -239,16 +243,6 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	}
 
 	otrl_tlv_free(tlvs);
-
-    /* If res=1 then we received an internal OTR protocol message
-       (like a fragment), and we don't want the user to see anything.
-       In the future we should return this status seperately so the
-       application can know if the message was a protocol message
-       vs. a failure to decrypt. */
-	if (res) {
-        if (ret_message) free(ret_message);
-		ret_message = NULL;
-	}
 
 	ret = newSVpv(ret_message, 0);
     if (ret_message) free(ret_message);
