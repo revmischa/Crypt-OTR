@@ -67,6 +67,9 @@ void crypt_otr_load_privkey( CryptOTRUserState in_state, const char* in_account,
 
 void process_sending_im( char* who, char* message );
 
+void crypt_otr_print_error_code(char* err_string, gcry_error_t err);
+void crypt_otr_print_error(char* err_string);
+
 /* Callbacks */
 void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char *fingerprint );
 static OtrlPolicy 	policy_cb(void *opdata, ConnContext *context);

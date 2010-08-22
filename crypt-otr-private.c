@@ -392,6 +392,10 @@ CryptOTRUserState crypt_otr_create_new_userstate(){
 }
 
 
+void crypt_otr_print_error_code(char* err_string, gcry_error_t err){
+  printf("\n******************\nOTR ERROR IN: %s (%d)\n******************\n\n", err_string, gcry_err_code(err));
+}
+
 void crypt_otr_print_error(char* err_string){
-	printf("\n******************\nERROR: %s\n******************\n\n", err_string);
+  printf("\n******************\nOTR UNKNOWN ERROR IN: %s\n******************\n\n", err_string);
 }

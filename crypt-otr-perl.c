@@ -89,7 +89,7 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 	int err;
 		
 	if( !who || !message )
-		return newSVpv( newmessage, 0);
+		return newSVpv( NULL, 0 );
 
 	err = otrl_message_sending( userstate, &otr_ops, crypt_state, 
 						   accountname, protocol, username, 
@@ -99,7 +99,7 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 		/* Be *sure* not to send out plaintext */
 		//puts( "Oops, message not encrypted" );
 		char* ourm = strdup( "" );
-		free( message ); // This may cause bugs, I don't know how perl allocates memory, though it's probably with strdup
+		free( message );
 		message = ourm;
 	} else if ( newmessage ) {
 		/* Fragment the message if necessary, and send all but the last
@@ -114,8 +114,8 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 									  newmessage, OTRL_FRAGMENT_SEND_ALL_BUT_LAST, &message);
 
 		// Checking for errors
-		if(err) {
-			crypt_otr_print_error("Fragmenting and sending message");
+		if (err) {
+            crypt_otr_print_error_code("fragmenting and sending message", err);
 		}
 		
 		otrl_message_free(newmessage);
@@ -129,11 +129,10 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
  * sets *message to NULL, when it was an internal otr message
  */
 SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, 
-						    char* who, char* sv_message )
+						    char* who, char* message )
 {
-	char* message = strdup( sv_message  );
-	char* message_out = NULL;
-    	char* newmessage = NULL;
+    char* decrypted_message = NULL;
+    char* ret_message = NULL;
 	OtrlTLV* tlvs = NULL;
 	OtrlTLV* tlv = NULL;
 	OtrlUserState userstate = crypt_state->otrl_state;
@@ -143,22 +142,22 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 	const char* protocol = in_protocol;
 	ConnContext* context;
 	NextExpectedSMP nextMsg;
+    SV* ret;
 
 	if( !who || !message )
-		return newSVpv( newmessage, 0);
+		return newSVpv(NULL, 0);
 
 	res = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
 							accountname, protocol, username, message,
-							&newmessage, &tlvs, NULL, NULL );
+							&decrypted_message, &tlvs, NULL, NULL );
 
-	if( newmessage ) {
-		char* ourm = malloc( strlen( newmessage ) + 1 );
-		if( ourm ) {
-			strcpy( ourm, newmessage );
-		}
-		otrl_message_free( newmessage );
-		free( message );
-		message = ourm;
+	if (decrypted_message) {
+        /* copy decrypted_message */
+		ret_message = malloc( strlen( decrypted_message ) + 1 );
+        strcpy( ret_message, decrypted_message );
+
+        /* we are responsible for freeing newmessage */
+		otrl_message_free( decrypted_message );
 	}
 
 	tlv = otrl_tlv_find( tlvs, OTRL_TLV_DISCONNECTED );
@@ -241,16 +240,19 @@ SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accoun
 
 	otrl_tlv_free(tlvs);
 
-	/* If we're supposed to ignore this incoming message (because it's a
-	 * protocol message), set it to NULL, so that other plugins that
-	 * catch receiving-im-msg don't return 0, and cause it to be
-	 * displayed anyway. */
+    /* If res=1 then we received an internal OTR protocol message
+       (like a fragment), and we don't want the user to see anything.
+       In the future we should return this status seperately so the
+       application can know if the message was a protocol message
+       vs. a failure to decrypt. */
 	if (res) {
-		free(message);
-		message = NULL;
+        if (ret_message) free(ret_message);
+		ret_message = NULL;
 	}
 
-	return newSVpv( message, 0 );
+	ret = newSVpv(ret_message, 0);
+    if (ret_message) free(ret_message);
+    return ret;
 }
 
 /* Start the Socialist Millionaires' Protocol over the current connection,
@@ -327,20 +329,19 @@ char* crypt_otr_get_privkey_fingerprint( CryptOTRUserState in_state, char *accou
 	char* fingerprint, fpr_ptr, accountname, protocol;
 	fingerprint = malloc(45);
 
-	// I don't know if it's safe practice to use the vars passed from XS
 	accountname = account;
 	protocol = proto;
 	
-	printf( "About to call otrl_privkey_fingerprint\n");
+	printf("About to call otrl_privkey_fingerprint\n");
 
 	fpr_ptr = otrl_privkey_fingerprint(in_state->otrl_state, fingerprint, accountname, protocol);
-	printf( "Done calling otrl_privkey_fingerprint\n");
+	printf("Done calling otrl_privkey_fingerprint\n");
 	
-	if( fpr_ptr){
+	if (fpr_ptr) {
 		
-		printf( "About to create perl var\n");
+		printf("About to create perl var\n");
 		// Create perl var, return it
-		SV *sig_sv = newSVpvn( fingerprint, 0);
+		SV *sig_sv = newSVpvn(fingerprint, 0);
 		
 		free(fingerprint);
 
@@ -353,7 +354,7 @@ char* crypt_otr_get_privkey_fingerprint( CryptOTRUserState in_state, char *accou
 	// There was an error, free memory
 	free(fingerprint);
 	
-	return ;
+	return;
 }
 
 char* crypt_otr_get_privkey_fingerprint_raw( CryptOTRUserState in_state, char *account, char *proto, int maxsize ) {
@@ -365,14 +366,9 @@ char* crypt_otr_get_privkey_fingerprint_raw( CryptOTRUserState in_state, char *a
 	accountname = account;
 	protocol = proto;
 
-	printf( "About to call otrl_privkey_fingerprint_raw\n");
-
 	fpr_ptr = otrl_privkey_fingerprint_raw(in_state->otrl_state, fingerprint, accountname, protocol);
 
-	printf( "Done calling otrl_privkey_fingerprint_raw\n");
-
-
-	if( fpr_ptr){
+	if (fpr_ptr){
 		// Create perl var, return it
 		SV *sig_sv = newSVpvn( fingerprint, 0);
 		
@@ -426,11 +422,11 @@ SV* crypt_otr_sign( CryptOTRUserState in_state, char *account, char *proto, int 
 
 	sign_error = otrl_privkey_sign(&sig, &siglen, privkey, msghash, strlen(msghash));
 
-	if(sign_error){
+	if (sign_error){
 		// There has to be a better way to pass an error,
 		// though string equality checking seems to be broken for the strings
 		// passed to Perl through XS, oh well
-		crypt_otr_print_error("Signing Data");
+        crypt_otr_print_error_code("Signing Data", sign_error);
 	} else {
 		// copy result, make SV
 		sig_sv = newSVpvn(sig, siglen);
@@ -473,8 +469,8 @@ unsigned int crypt_otr_verify( unsigned char *msghash, unsigned char *sig, unsig
 
 	gcry_error_t err = otrl_privkey_verify( sig, strlen(sig), pubkey_type, pubkey, msghash, strlen(msghash) );
 
-	if(err){
-		crypt_otr_print_error("Verifying data");
+	if (err){
+        crypt_otr_print_error_code("Verifying data", err);
 	}
 	
 	gcry_sexp_release(pubkey);
