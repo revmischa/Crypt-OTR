@@ -1,7 +1,7 @@
 use threads;
 use threads::shared;use Digest::SHA1  qw(sha1);
 
-use Test::More tests => 20;
+use Test::More tests => 19;
 BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
@@ -290,11 +290,14 @@ sub test_fingerprint_read_write {
 # - Disconnecting
 
 sub test_multithreading {
-    my $alice_thread = async {
+    # don't run these at the same time
+    my $alice = test_init($u1, $bob_buf);
+    my $bob   = test_init($u2, $alice_buf);
+    ok($alice && $bob, "Initialized identities, generating private keys...");
+    $alice->load_privkey;
+    $bob->load_privkey;
 
-		my $alice = test_init($u1, $bob_buf);
-		ok($alice, "Initialized identities, generating private keys...");
-		$alice->load_privkey;
+    my $alice_thread = async {
 		ok($alice, "Generated / loaded private key for $u1...");
 
         $alice->establish($u2);
@@ -401,11 +404,7 @@ sub test_multithreading {
 
     my $bob_thread = async {
         # establish
-		my $bob   = test_init($u2, $alice_buf);
-		ok($bob, "Initialized identities, generating private keys...");
-
         {
-			$bob->load_privkey;
 			ok($bob, "Generated / loaded private key for $u2...");
 
             $bob->establish($u1);
