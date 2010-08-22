@@ -2,4 +2,3 @@ TYPEMAP
 
 CryptOTRUserState     T_UV
 Crypt::OTR::PublicKey T_PTROBJ
-short*                T_PTR
