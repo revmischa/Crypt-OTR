@@ -7,7 +7,7 @@ use Carp qw/croak/;
 use Crypt::OTR::PublicKey;
 use AutoLoader;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
