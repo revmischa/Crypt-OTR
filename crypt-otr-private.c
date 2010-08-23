@@ -370,11 +370,12 @@ void crypt_otr_abort_smp_context( CryptOTRUserState crypt_state, ConnContext* co
 CryptOTRUserState crypt_otr_create_new_userstate(){
 	CryptOTRUserState crypt_state  = malloc( sizeof( struct crypt_otr_user_state ) );
 
-        crypt_state->privkey_loaded = 0;
+    crypt_state->privkey_loaded = 0;
 	crypt_state->otrl_state = NULL;
 	crypt_state->root = NULL;
 	crypt_state->keyfile = NULL;
 	crypt_state->fprfile = NULL;
+	crypt_state->max_size = CRYPT_OTR_MAX_SIZE;
 	
 	crypt_state->inject_cb = NULL;
 	crypt_state->system_message_cb = NULL;

@@ -15,6 +15,9 @@
 #define PRIVKEY_FILE_NAME "otr.private_key"
 #define STORE_FILE_NAME "otr.fingerprints"
 
+// max message size
+const unsigned int CRYPT_OTR_MAX_SIZE = 65535;
+
 typedef struct crypt_otr_user_state* CryptOTRUserState;
 
 struct crypt_otr_user_state {
@@ -23,7 +26,7 @@ struct crypt_otr_user_state {
 	char* keyfile;
 	char* fprfile;	
 	unsigned int max_size;
-        unsigned short privkey_loaded;
+    unsigned short privkey_loaded;
 
 	CV* inject_cb;
 	CV* system_message_cb;

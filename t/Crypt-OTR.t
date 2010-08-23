@@ -127,29 +127,23 @@ sub test_signing {
 	return 1;
 }
 
-# Used to reset all values so another conversation based test can start
+# Used to reset all values so another conversation-based test can start
 sub flush_shared {
 
-	my $flush_thread = async {
-		# Flush the buffers, in case any remained from the previous test
-		@$alice_buf = ();
-		@$bob_buf = ();
+    # Flush the buffers, in case any remained from the previous test
+    @$alice_buf = ();
+    @$bob_buf = ();
 
-		$connected{ $u1 } = 0; 
-		$connected{ $u2 } = 0; 
-		$disconnected{ $u1 } = 0;
-		$disconnected{ $u2 } = 0;
-		$secured{ $u1 } = 0;
-		$secured{ $u2 } = 0;
-		$smp_request{ $u1 } = 0;
-		$smp_request{ $u2 } = 0;
-		$new_fingerprint{ $u1 } = 0;
-		$new_fingerprint{ $u2 } = 0;
-
-
-		};
-	
-	$flush_thread->join;
+    $connected{ $u1 } = 0; 
+    $connected{ $u2 } = 0; 
+    $disconnected{ $u1 } = 0;
+    $disconnected{ $u2 } = 0;
+    $secured{ $u1 } = 0;
+    $secured{ $u2 } = 0;
+    $smp_request{ $u1 } = 0;
+    $smp_request{ $u2 } = 0;
+    $new_fingerprint{ $u1 } = 0;
+    $new_fingerprint{ $u2 } = 0;
 }
 
 # TODO:
@@ -545,7 +539,7 @@ sub test_init {
     # callback to inject an encrypted message (add to recipient's buffer)
     my $inject = sub {
         my ( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
-
+        fail("inject callback called with no message") unless $message;
         lock( @$dest );
         push @$dest, $message;
     };
