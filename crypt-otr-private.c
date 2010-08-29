@@ -22,7 +22,7 @@ crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, co
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
 	PUTBACK;
 
-	call_sv( crypt_state->inject_cb, G_DISCARD );
+	call_sv( (SV*)crypt_state->inject_cb, G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -48,7 +48,7 @@ crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accoun
 	XPUSHs( sv_2mortal( newSVpv( message, 0 )));
 	PUTBACK;
 
-	num_items_on_stack = call_sv( crypt_state->system_message_cb, G_DISCARD );
+	num_items_on_stack = call_sv( (SV*)crypt_state->system_message_cb, G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -78,15 +78,15 @@ void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level,
 	switch (level) {
 	case OTRL_NOTIFY_ERROR:
       if ( crypt_state->error_cb )
-		call_sv( crypt_state->error_cb, G_DISCARD );
+		call_sv( (SV*)crypt_state->error_cb, G_DISCARD );
       break;
 	case OTRL_NOTIFY_WARNING:
       if ( crypt_state->warning_cb )
-        call_sv( crypt_state->warning_cb, G_DISCARD );
+        call_sv( (SV*)crypt_state->warning_cb, G_DISCARD );
       break;
 	case OTRL_NOTIFY_INFO:
       if ( crypt_state->info_cb )
-		call_sv( crypt_state->info_cb, G_DISCARD );
+		call_sv( (SV*)crypt_state->info_cb, G_DISCARD );
       break;
 	}
 	
@@ -111,7 +111,7 @@ void crypt_otr_notify_new_fingerprint( CryptOTRUserState crypt_state, const char
 	XPUSHs( sv_2mortal( newSVpv( fingerprint, 20 )));
 	PUTBACK;
 
-	call_sv( crypt_state->new_fpr_cb, G_DISCARD );
+	call_sv( (SV*)crypt_state->new_fpr_cb, G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -140,7 +140,7 @@ void crypt_otr_smp_notify( CryptOTRUserState crypt_state, SMPNotifyType notify,
 	XPUSHs( sv_2mortal( newSVpv( question, 0 )));
 	PUTBACK;
 
-	call_sv( crypt_state->smp_request_cb, G_DISCARD );
+	call_sv( (SV*)crypt_state->smp_request_cb, G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;
@@ -185,7 +185,7 @@ void crypt_otr_callback_one_string( CV* callback_sub, char* username )
 	XPUSHs( sv_2mortal( newSVpv( username, 0 ))); 
 	PUTBACK;
 
-	call_sv( callback_sub, G_DISCARD );
+	call_sv( (SV*)callback_sub, G_DISCARD );
 	
 	FREETMPS;
 	LEAVE;

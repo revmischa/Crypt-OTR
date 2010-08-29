@@ -15,7 +15,7 @@ static const char *protocol_name_cb(void *opdata, const char *protocol)
 	return strdup(protocol);
 }
 
-static void protocol_name_free_cb(void *opdata, const char *protocol_name)
+static void protocol_name_free_cb(void *opdata, char *protocol_name)
 {
 	free( protocol_name );
 }

@@ -38,17 +38,16 @@ crypt_otr_process_sending( IN CryptOTRUserState perl_state, IN char* perl_accoun
 	OUTPUT:
 		RETVAL
 
-SV* 
-crypt_otr_process_receiving( IN perl_state, IN perl_account, IN perl_proto, IN perl_max, IN perl_who, IN perl_message, OUTLIST should_discard )
+void
+crypt_otr_process_receiving( IN perl_state, IN perl_account, IN perl_proto, IN perl_max, IN perl_who, IN perl_message, OUTLIST out_plaintext, OUTLIST out_should_discard )
     CryptOTRUserState perl_state
     char* perl_account
     char* perl_proto
     int perl_max
     char* perl_who
     char* perl_message
-    short should_discard
-	OUTPUT:
-		RETVAL
+    SV* out_plaintext
+    short out_should_discard
 
 void
 crypt_otr_start_smp( IN CryptOTRUserState perl_state, IN char* perl_account, IN char* perl_proto, IN int perl_max, IN char* perl_who, IN char* perl_secret )

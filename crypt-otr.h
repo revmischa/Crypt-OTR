@@ -61,8 +61,8 @@ void 		crypt_otr_handle_stillconnected( CryptOTRUserState in_state, char* userna
 static int 	crypt_otr_display_otr_message( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, const char* message );
 static void 	crypt_otr_inject_message( CryptOTRUserState crypt_state, const char* account, const char* protocol, const char* recipient, const char* message );
 
-SV*  crypt_otr_process_receiving( CryptOTRUserState crypt_state, char* in_accountname, char* in_protocol, int in_max, 
-                                  char* who, char* message, short *should_discard );
+void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_accountname, const char* in_protocol, int in_max, 
+                                  const char* who, const char* message, SV**, short *out_should_discard );
 
 void crypt_otr_notify( CryptOTRUserState crypt_state, OtrlNotifyLevel level, const char* accountname, const char* protocol, const char* username, const char* title, const char* primary, const char* secondary );
 
@@ -80,7 +80,7 @@ void crypt_otr_print_error(char* err_string);
 void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accountname, const char* protocol, const char* username, unsigned char *fingerprint );
 static OtrlPolicy 	policy_cb(void *opdata, ConnContext *context);
 static const char *	protocol_name_cb(void *opdata, const char *protocol);
-static void 		protocol_name_free_cb(void *opdata, const char *protocol_name);
+static void 		protocol_name_free_cb(void *opdata, char *protocol_name);
 static void 		create_privkey_cb(CryptOTRUserState opdata, const char *accountname,
 							   const char *protocol);
 static int 		is_logged_in_cb(void *opdata, const char *accountname,
