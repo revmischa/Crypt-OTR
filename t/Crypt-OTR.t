@@ -1,7 +1,7 @@
 use threads;
 use threads::shared;use Digest::SHA1  qw(sha1);
 
-use Test::More tests => 19;
+use Test::More tests => 18;
 BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
@@ -472,7 +472,7 @@ sub test_multithreading {
                 
                 if( $msg )
                 {
-                    my $resp = $bob->decrypt($u1, $msg);
+                    my ($resp, $is_status) = $bob->decrypt($u1, $msg);
                     if($resp){
                         print "resp $resp\n";
                     }

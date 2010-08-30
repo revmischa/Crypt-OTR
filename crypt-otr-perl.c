@@ -157,12 +157,12 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 	tlv = otrl_tlv_find( tlvs, OTRL_TLV_DISCONNECTED );
 	if( tlv ) {
 		/* Notify the user that the other side disconnected */
-		crypt_otr_handle_disconnection(crypt_state, in_accountname);
+		crypt_otr_handle_disconnection(crypt_state, who);
 	}
 
 	/* Keep track of our current progress in the Socialist Millionaires'
 	 * Protocol. */
-	context = otrl_context_find( userstate, in_accountname, 
+	context = otrl_context_find( userstate, who, 
 						    in_accountname, in_protocol, 0, NULL, NULL, NULL );
 
 	if( context ) {
