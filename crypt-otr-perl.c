@@ -140,7 +140,6 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 	OtrlTLV* tlvs = NULL;
 	OtrlTLV* tlv = NULL;
 	OtrlUserState userstate = crypt_state->otrl_state;
-	int res;
 	ConnContext* context;
 	NextExpectedSMP nextMsg;
 

@@ -6,11 +6,13 @@ BEGIN { use_ok('Crypt::OTR') };
 
 use strict;
 use warnings;
+use Carp qw/confess/;
 
 my $finished : shared = 0;
 my %e;
 my $established : shared;
 $established = share(%e);
+my $test_init : shared;
 
 my @test_alice:shared;
 my $test_alice_buf = \@test_alice;
@@ -285,13 +287,10 @@ sub test_fingerprint_read_write {
 
 sub test_multithreading {
     # don't run these at the same time
-    my $alice = test_init($u1, $bob_buf);
-    my $bob   = test_init($u2, $alice_buf);
-    ok($alice && $bob, "Initialized identities, generating private keys...");
-    $alice->load_privkey;
-    $bob->load_privkey;
 
     my $alice_thread = async {
+        my $alice = test_init($u1, $bob_buf);
+
 		ok($alice, "Generated / loaded private key for $u1...");
 
         $alice->establish($u2);
@@ -397,6 +396,8 @@ sub test_multithreading {
     };
 
     my $bob_thread = async {
+        my $bob   = test_init($u2, $alice_buf);
+
         # establish
         {
 			ok($bob, "Generated / loaded private key for $u2...");
@@ -526,9 +527,10 @@ sub test_multithreading {
     return 1;
 }
 
-
 sub test_init {
     my ($user, $dest) = @_;
+
+    lock( $test_init );
 
     my $otr = new Crypt::OTR(
         account_name     => $user,
@@ -539,7 +541,7 @@ sub test_init {
     # callback to inject an encrypted message (add to recipient's buffer)
     my $inject = sub {
         my ( $ptr, $account_name, $protocol, $dest_account, $message) = @_;
-        fail("inject callback called with no message") unless $message;
+        die "no message passed to inject" unless $message;
         lock( @$dest );
         push @$dest, $message;
     };
@@ -656,6 +658,8 @@ sub test_init {
     $otr->set_callback('smp_request' => $smp_request_cb);
 
     $otr->set_callback('new_fingerprint' => $new_fingerprint_cb);
+
+    $otr->load_privkey;
 
     return $otr;
 }
