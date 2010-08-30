@@ -8,13 +8,14 @@
 int crypt_otr_init(  )
 {		
 	OTRL_INIT;
-	// This works without this line, and the pidgin OTR plugin doesn't use it
+	/* It's ambiguous whether or not you need to include the following
+   * commented line, but the plugin works with it commented out,
+   * and the pidgin OTR plugin doesn't call it anywhere. */
 	//otrl_sm_init();
 }
 
 CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char* protocol )
 {
-	char* root = in_root;
 	char* temp_keyfile;
 	char* temp_fingerprintfile;
 	CryptOTRUserState crypt_state = crypt_otr_create_new_userstate();
@@ -26,13 +27,13 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
                                 strlen(PRIVKEY_FILE_NAME) +
                                 strlen(account_name) +
                                 strlen(protocol) +
-                                3 + 1)*sizeof(char) ); // +1 for the \0
+                                3 + 1)*sizeof(char) ); // +1 for null termination
 
 	temp_fingerprintfile =  malloc( (strlen(in_root) + 
                                          strlen(STORE_FILE_NAME) +
                                          strlen(account_name) +
                                          strlen(protocol) + 
-                                         3 + 1)*sizeof(char) ); // +1 for the \0 
+                                         3 + 1)*sizeof(char) ); // +1 for null termination
 		
 	sprintf( temp_keyfile, "%s/%s-%s-%s", in_root, PRIVKEY_FILE_NAME, account_name, protocol);
 	sprintf( temp_fingerprintfile, "%s/%s-%s-%s", in_root, STORE_FILE_NAME, account_name, protocol);
@@ -43,8 +44,8 @@ CryptOTRUserState crypt_otr_create_user( char* in_root, char* account_name, char
 	return crypt_state;
 }
 
-// load private key from file, or create new one
-// (this may block for several minutes while generating a key)
+/* load private key from file, or create new one
+ * (this may block for several minutes while generating a key) */
 void crypt_otr_load_privkey( CryptOTRUserState in_state, const char* in_account, const char* in_proto, int in_max ) {
   if (in_state->privkey_loaded)
     return;
@@ -83,21 +84,17 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 	char* newmessage = NULL;
 	char* message = strdup( sv_message );
 	OtrlUserState userstate = crypt_state->otrl_state;
-	const char* accountname = in_account;
-	const char* protocol = in_proto;
-	char* username = who;
 	int err;
 		
 	if( !who || !message )
 		return newSVpv( NULL, 0 );
 
 	err = otrl_message_sending( userstate, &otr_ops, crypt_state, 
-						   accountname, protocol, username, 
+						   in_account, in_proto, who, 
 						   message, NULL, &newmessage, NULL, NULL);
 
 	if( err && (newmessage == NULL) ) {
 		/* Be *sure* not to send out plaintext */
-		//puts( "Oops, message not encrypted" );
 		char* ourm = strdup( "" );
 		free( message );
 		message = ourm;
@@ -105,8 +102,8 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 		/* Fragment the message if necessary, and send all but the last
 		 * fragment over the network.  The client will send the last
 		 * fragment for us. */
-		ConnContext* context = otrl_context_find( userstate, username, accountname, 
-										  protocol, 0, NULL, NULL, NULL );
+		ConnContext* context = otrl_context_find( userstate, who, in_account, 
+										  in_proto, 0, NULL, NULL, NULL );
 		
 		free( message );
 		message = NULL;
@@ -124,35 +121,33 @@ SV* crypt_otr_process_sending( CryptOTRUserState crypt_state, char* in_account, 
 	return newSVpv( message, 0 );
 }
 
-/*
- * returns plaintext if successful.
+/* returns plaintext if successful.
  * returns status boolean in should_discard.
  * if should_discard is true, this was an internal OTR protocol
  *     message and should be ignored by the application.
  */
-
 void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_accountname,
                                   const char* in_protocol, int in_max, const char* who,
                                   const char* message, SV** out_plaintext, short *out_should_discard )
 {
-    SV* ret;
-    char* ret_message = NULL;
+  SV* ret;
+  char* ret_message = NULL;
 	OtrlTLV* tlvs = NULL;
 	OtrlTLV* tlv = NULL;
 	OtrlUserState userstate = crypt_state->otrl_state;
 	ConnContext* context;
 	NextExpectedSMP nextMsg;
 
-    *out_should_discard = 0;
+  *out_should_discard = 0;
 
 	if( !who || !message ) {
-      *out_plaintext = newSVpvn(NULL, 0);
-      return;
-    }
+    *out_plaintext = newSVpvn(NULL, 0);
+    return;
+  }
 
 	*out_should_discard = otrl_message_receiving( userstate, &otr_ops, crypt_state, 
-                                              in_accountname, in_protocol, who, message,
-                                              &ret_message, &tlvs, NULL, NULL );
+                                                in_accountname, in_protocol, who, message,
+                                                &ret_message, &tlvs, NULL, NULL );
 
 	tlv = otrl_tlv_find( tlvs, OTRL_TLV_DISCONNECTED );
 	if( tlv ) {
@@ -163,7 +158,7 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 	/* Keep track of our current progress in the Socialist Millionaires'
 	 * Protocol. */
 	context = otrl_context_find( userstate, who, 
-						    in_accountname, in_protocol, 0, NULL, NULL, NULL );
+                               in_accountname, in_protocol, 0, NULL, NULL, NULL );
 
 	if( context ) {
 		nextMsg = context->smstate->nextExpected;
@@ -182,7 +177,7 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 					char *eoq = memchr(question, '\0', tlv->len);
 					if (eoq) {
 						crypt_otr_ask_socialist_millionaires(crypt_state, in_accountname, in_protocol,
-													  context, question, 1);
+                                                 context, question, 1);
 					}
 				}
 			}
@@ -192,7 +187,7 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
 					crypt_otr_ask_socialist_millionaires(crypt_state, in_accountname, in_protocol,
-												  context, NULL, 1 );
+                                               context, NULL, 1 );
 				}
 			}
 			tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
@@ -201,7 +196,7 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
 					crypt_otr_notify_socialist_millionaires_status( crypt_state, in_accountname, in_protocol,
-														   context, 2 );
+                                                          context, 2 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT4;
 				}
 			}
@@ -211,7 +206,7 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
 					crypt_otr_notify_socialist_millionaires_status( crypt_state, in_accountname, in_protocol, 
-														   context, 3 );
+                                                          context, 3 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 				}
 			}
@@ -221,7 +216,7 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 					crypt_otr_abort_smp_context(crypt_state, context);
 				else {
 					crypt_otr_notify_socialist_millionaires_status( crypt_state, in_accountname, in_protocol,
-														   context, 3 );
+                                                          context, 3 );
 					context->smstate->nextExpected = OTRL_SMP_EXPECT1;
 				}
 			}
@@ -234,12 +229,12 @@ void crypt_otr_process_receiving( CryptOTRUserState crypt_state, const char* in_
 
 	otrl_tlv_free(tlvs);
 
-    /* copy message */
+  /* copy message */
 	ret = newSVpv(ret_message, 0);
-    *out_plaintext = ret;
+  *out_plaintext = ret;
 
-    /* we are responsible for freeing ret_message */
-    if (ret_message) otrl_message_free(ret_message);
+  /* we are responsible for freeing ret_message */
+  if (ret_message) otrl_message_free(ret_message);
 }
 
 /* Start the Socialist Millionaires' Protocol over the current connection,
@@ -289,7 +284,11 @@ void crypt_otr_abort_smp( CryptOTRUserState crypt_state, char* in_accountname, c
 }
 
 
-///// Accessors
+////////////////////////////////////////////////
+// ACCESSORS
+///////////////////////////////////////////////
+
+
 SV* crypt_otr_get_keyfile( CryptOTRUserState in_state ) { return newSVpv( in_state->keyfile, 0 ); }
 SV* crypt_otr_get_fprfile( CryptOTRUserState in_state ) { return newSVpv( in_state->fprfile, 0 ); }
 
@@ -362,10 +361,10 @@ void crypt_otr_forget_all( CryptOTRUserState in_state, char* account, char* prot
 	otrl_privkey_forget_all(in_state->otrl_state);
 }
 
+////////////////////////////////////////////////
+// SIGNING
+///////////////////////////////////////////////
 
-
-
-///// Signing
 // would be nice to make this take a scalarref instead of a char*
 SV* crypt_otr_sign( CryptOTRUserState in_state, char *account, char *proto, int maxsize, char *msghash ) {
 
@@ -386,7 +385,7 @@ SV* crypt_otr_sign( CryptOTRUserState in_state, char *account, char *proto, int 
 		// There has to be a better way to pass an error,
 		// though string equality checking seems to be broken for the strings
 		// passed to Perl through XS, oh well
-        crypt_otr_print_error_code("Signing Data", sign_error);
+    crypt_otr_print_error_code("Signing Data", sign_error);
 	} else {
 		// copy result, make SV
 		sig_sv = newSVpvn(sig, siglen);
@@ -408,9 +407,6 @@ SV* crypt_otr_get_pubkey_str( CryptOTRUserState in_state, char *account, char *p
   SV *privkey_sv = newSVpvn(privkey->pubkey_data, privkey->pubkey_datalen);
   return privkey_sv;
 }
-
-
-// 
 
 unsigned int crypt_otr_verify( unsigned char *msghash, unsigned char *sig, unsigned char *pubkey_data,
                                size_t pubkey_length, unsigned short pubkey_type) {
@@ -438,6 +434,12 @@ unsigned int crypt_otr_verify( unsigned char *msghash, unsigned char *sig, unsig
 	//  printf("type: %d err: %d, msg: %s\n", pubkey_type, err, gcry_strerror(err));
 	return err == 0;
 }
+
+
+////////////////////////////////////////////////
+// CLEANUP
+///////////////////////////////////////////////
+
 
 void crypt_otr_cleanup( CryptOTRUserState crypt_state ){
   if (crypt_state->inject_cb)

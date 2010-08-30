@@ -23,13 +23,9 @@ static void protocol_name_free_cb(void *opdata, char *protocol_name)
 static void create_privkey_cb(CryptOTRUserState opdata, const char *accountname,
 	const char *protocol)
 {
-
-  // this may get called even if a privkey file already exists.
-  // load_privkey will load it if present, otherwise it will
-  // generate a new key
+  /* loads a private key if one is present, otherwise it will
+   * generate a new key */
   crypt_otr_load_privkey(opdata, accountname, protocol, 0);
-
-  // crypt_otr_create_privkey(opdata, accountname, protocol);
 }
 
 /* Report whether you think the given user is online.  Return 1 if

@@ -1,15 +1,12 @@
 
-
-
-
 ////////////////////////////////////
 // Utilities
 ///////////////////////////////////
 
-
-//  expandFilename(filename)
-// Expand "~/" with the $HOME env. variable in a file name.
-// The caller must free the string after use.
+/*  expandFilename(filename)
+ * Expand "~/" with the $HOME env. variable in a file name.
+ * The caller must free the string after use.
+ */
 char *expand_filename(const char *fname)
 {
 	char* buffer;

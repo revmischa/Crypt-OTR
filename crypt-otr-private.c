@@ -1,6 +1,4 @@
 
-
-
 ////////////////////////////////////////////////
 // PRIVATE NON-CALLBACK, NON-PERL FUNCTIONS
 ///////////////////////////////////////////////
@@ -117,9 +115,6 @@ void crypt_otr_notify_new_fingerprint( CryptOTRUserState crypt_state, const char
 	LEAVE;
 }
 
-
-
-
 /* This function notifies of both authentication questions
  * and requests.
  */
@@ -218,26 +213,26 @@ void crypt_otr_handle_stillconnected( CryptOTRUserState crypt_state, char* usern
 /* Find the trust level of the conversation, given its context */
 int crypt_otr_context_to_trust(ConnContext *context)
 {
-    TrustLevel level = TRUST_NOT_PRIVATE;
+  TrustLevel level = TRUST_NOT_PRIVATE;
 
-    if (context && context->msgstate == OTRL_MSGSTATE_ENCRYPTED) {
-	if (context->active_fingerprint->trust &&
-		context->active_fingerprint->trust[0] != '\0') {
+  if (context && context->msgstate == OTRL_MSGSTATE_ENCRYPTED) {
+    if (context->active_fingerprint->trust &&
+        context->active_fingerprint->trust[0] != '\0') {
 	    level = TRUST_PRIVATE;
-	} else {
+    } else {
 	    level = TRUST_UNVERIFIED;
-	}
-    } else if (context && context->msgstate == OTRL_MSGSTATE_FINISHED) {
-	level = TRUST_FINISHED;
     }
+  } else if (context && context->msgstate == OTRL_MSGSTATE_FINISHED) {
+    level = TRUST_FINISHED;
+  }
 
-    return level;
+  return level;
 }
 
 /* Generate a private key for the given accountname/protocol */
 void crypt_otr_create_privkey( CryptOTRUserState crypt_state, const char* accountname, const char* protocol  )						
 {
-    	int key_error;
+  int key_error;
 	OtrlUserState userstate = crypt_state->otrl_state;
 	char* keyfile = crypt_state->keyfile;	
 
@@ -296,7 +291,6 @@ static void crypt_otr_message_disconnect( CryptOTRUserState crypt_state,  ConnCo
 	otrl_message_disconnect( userstate, &otr_ops, crypt_state, ctx->accountname, ctx->protocol, ctx->username );
 }
 
-
 /* Looks up the context
  * Accountname = you
  * Username = them  */
@@ -319,13 +313,13 @@ void crypt_otr_new_fingerprint( CryptOTRUserState crypt_state, const char* accou
 {
 	if( crypt_state->new_fpr_cb )
 		crypt_otr_notify_new_fingerprint( crypt_state, accountname, protocol,
-								    username, fingerprint );
+                                      username, fingerprint );
 } 
 
 
 void crypt_otr_notify_socialist_millionaires_status( CryptOTRUserState crypt_state, char* accountname, char* protocol,
-										   ConnContext* context,
-										   int progress )
+                                                     ConnContext* context,
+                                                     int progress )
 {
 	if( progress > 2 ){
 		TrustLevel level = crypt_otr_context_to_trust(context);
@@ -339,8 +333,8 @@ void crypt_otr_notify_socialist_millionaires_status( CryptOTRUserState crypt_sta
 	sprintf( prog, "SMP progress level = %i", progress);	
 
 	crypt_otr_notify( crypt_state, OTRL_NOTIFY_INFO,
-				   accountname, protocol, context->username,
-				   "Socialist Millionaires Protocol", "Status Update", prog);
+                    accountname, protocol, context->username,
+                    "Socialist Millionaires Protocol", "Status Update", prog);
 
 	free( prog );
 }
@@ -370,7 +364,7 @@ void crypt_otr_abort_smp_context( CryptOTRUserState crypt_state, ConnContext* co
 CryptOTRUserState crypt_otr_create_new_userstate(){
 	CryptOTRUserState crypt_state  = malloc( sizeof( struct crypt_otr_user_state ) );
 
-    crypt_state->privkey_loaded = 0;
+  crypt_state->privkey_loaded = 0;
 	crypt_state->otrl_state = NULL;
 	crypt_state->root = NULL;
 	crypt_state->keyfile = NULL;
