@@ -25,11 +25,11 @@ sub libGcryptIsInstalled(){
 
 
 unless( libOtrIsInstalled() ) {
-	die("OTR library not installed.  Please install and continue.");
+	die("OTR library not installed.  Please install (package=libotr2-dev) and continue.");
 }
 
 unless( libGcryptIsInstalled() ) {
-	die("gcrypt not installed.  Please install and continue.");
+	die("gcrypt not installed.  Please install (package=libgcrypt-dev) and continue.");
 }
 
 
