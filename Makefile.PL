@@ -44,6 +44,9 @@ WriteMakefile(
     LIBS              => ['-L/usr/lib -lotr'], # e.g., '-lm'
     DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
     INC               => '-I. -I/usr/include', # e.g., '-I. -I/usr/include/other'
+
+    META_ADD => { resources => { repository => 'git://github.com/revmischa/Crypt-OTR.git' } },
+    
 	# Un-comment this if you add C files to link with later:
     # OBJECT            => '$(O_FILES)', # link all the C files too
 );
